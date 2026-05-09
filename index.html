@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>محرر ملف الإنجاز الاحترافي</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&family=Tajawal:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --turquoise: #008080; 
+            --dark: #1a1a1a; 
+        }
+        * { box-sizing: border-box; font-weight: normal !important; }
+        
+        body { 
+            margin: 0; background: #2c2c2c; 
+            font-family: 'Tajawal', sans-serif; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .header-tools {
+            position: fixed; top: 0; width: 100%; background: #fff;
+            padding: 12px; display: flex; justify-content: center;
+            gap: 12px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-family: 'Tajawal'; font-size: 14px; }
+        .btn-add { background: #27ae60; color: white; }
+        .btn-pdf { background: #e74c3c; color: white; }
+
+        #content-area { margin-top: 70px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+        .page-container {
+            width: 100vw; display: flex; justify-content: center;
+            height: calc(100vw * 1.414); margin-bottom: 25px;
+        }
+
+        .a4-sheet {
+            width: 794px; height: 1123px; background: white;
+            position: relative; display: flex; flex-direction: column;
+            padding: 80px 60px; flex-shrink: 0; transform-origin: top center;
+        }
+
+        .frame {
+            position: absolute; top: 25px; left: 25px; right: 25px; bottom: 25px;
+            border: 3px double var(--turquoise); pointer-events: none;
+        }
+
+        /* ----- الغلاف ----- */
+        .cover-mode { justify-content: center; align-items: center; text-align: center; }
+        .cover-title { 
+            color: var(--turquoise); 
+            font-size: 100px; 
+            font-family: 'Cairo'; 
+            line-height: 1.5;
+        }
+        .gold-divider { width: 40%; height: 2px; background: var(--turquoise); margin: 20px auto 40px; }
+
+        /* ----- الصفحات الداخلية ----- */
+        .page-header { text-align: right; margin-bottom: 30px; }
+        .page-header h2 { 
+            display: inline-block;
+            background-color: var(--turquoise); 
+            color: white !important; 
+            font-family: 'Cairo'; 
+            font-size: 38px; 
+            padding: 5px 30px; 
+            border-radius: 50px 0 0 50px;
+            line-height: 1.8;
+        }
+
+        /* الحقول القابلة للتعديل */
+        [contenteditable="true"] {
+            outline: none; background: transparent;
+            font-family: 'Cairo', sans-serif;
+            display: block; width: 95%; margin: 0 auto;
+            word-wrap: break-word; padding: 10px;
+        }
+
+        .editable-name, .editable-manager { font-size: 36px; color: #333; text-align: center; }
+        .editable-sub { 
+            font-size: 32px; text-align: right; color: #444; 
+            margin-top: 15px; border-right: 4px solid var(--turquoise); 
+            padding-right: 15px !important; 
+        }
+
+        /* Placeholder: يختفي تلقائياً عند الطباعة */
+        [contenteditable="true"]:empty:before { 
+            content: attr(data-placeholder); 
+            color: #aaa; 
+        }
+
+        .img-container {
+            flex: 1; display: flex; justify-content: center; align-items: center;
+            border: 2px dashed #ccc; position: relative; margin: 20px 0;
+            background: #fdfdfd; overflow: hidden; border-radius: 10px;
+        }
+        .img-container img { width: 100%; height: 100%; object-fit: contain; z-index: 1; }
+        .file-input { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; }
+        .placeholder-text { position: absolute; color: #999; pointer-events: none; font-size: 22px; }
+
+        .footer-num { text-align: center; font-size: 18px; position: absolute; bottom: 50px; width: 100%; left: 0; color: #777; }
+        
+        .del-btn {
+            position: absolute; top: 10px; left: 10px; background: #ff4444;
+            color: white; border: none; padding: 12px 20px; border-radius: 4px;
+            cursor: pointer; z-index: 100; font-size: 20px;
+        }
+
+        /* وضع التصدير PDF: إخفاء العناصر غير المرغوبة */
+        .exporting .page-container { height: auto !important; width: auto !important; }
+        .exporting .a4-sheet { transform: scale(1) !important; margin: 0 !important; }
+        .exporting .del-btn, .exporting .file-input, .exporting .placeholder-text { display: none !important; }
+        
+        /* أهم تعديل: إخفاء الـ placeholder تماماً في الـ PDF */
+        .exporting [contenteditable="true"]:empty:before {
+            content: "" !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-tools">
+    <button class="btn btn-add" onclick="createNewPage()">➕ إضافة صفحة</button>
+    <button class="btn btn-pdf" onclick="generateFinalPDF()">📥 تحميل PDF</button>
+</div>
+
+<div id="content-area">
+    <div class="page-container">
+        <div class="a4-sheet cover-mode">
+            <div class="frame"></div>
+            <h1 class="cover-title">ملف الإنجاز</h1>
+            <div class="gold-divider"></div>
+            <div class="input-wrapper" style="width: 100%;">
+                <div class="editable-name" contenteditable="true" data-placeholder="اسم المعلم / المعلمة"></div>
+                <div class="editable-manager" contenteditable="true" data-placeholder="اسم مدير المدرسة"></div>
+            </div>
+            <div class="footer-num">1</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function adjustScaling() {
+        const sheets = document.querySelectorAll('.a4-sheet');
+        const screenWidth = window.innerWidth;
+        const scaleValue = screenWidth / 794;
+        sheets.forEach(sheet => {
+            sheet.style.transform = `scale(${scaleValue})`;
+            sheet.parentElement.style.height = (1123 * scaleValue) + 'px';
+        });
+    }
+
+    window.addEventListener('resize', adjustScaling);
+
+    function createNewPage() {
+        const area = document.getElementById('content-area');
+        const container = document.createElement('div');
+        container.className = 'page-container';
+        
+        container.innerHTML = `
+            <div class="a4-sheet">
+                <div class="frame"></div>
+                <button class="del-btn" onclick="this.closest('.page-container').remove(); updatePageNumbers();">حذف</button>
+                <div class="page-header">
+                    <h2>ملف الإنجاز</h2>
+                    <div class="editable-sub" contenteditable="true" data-placeholder="العنوان الفرعي (مثلاً: السيرة الذاتية)"></div>
+                </div>
+                <div class="img-container">
+                    <span class="placeholder-text">اضغط لإرفاق الصورة</span>
+                    <input type="file" class="file-input" accept="image/*" onchange="handleImage(this)">
+                    <img src="" style="display:none">
+                </div>
+                <div class="footer-num"></div>
+            </div>
+        `;
+        area.appendChild(container);
+        adjustScaling();
+        updatePageNumbers();
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function handleImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = input.nextElementSibling;
+                img.src = e.target.result;
+                img.style.display = 'block';
+                input.previousElementSibling.style.display = 'none';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function updatePageNumbers() {
+        const footers = document.querySelectorAll('.footer-num');
+        footers.forEach((f, i) => { f.innerText = i + 1; });
+    }
+
+    async function generateFinalPDF() {
+        const { jsPDF } = window.jspdf;
+        // تفعيل وضع التصدير قبل البدء
+        document.body.classList.add('exporting');
+        
+        const pages = document.querySelectorAll('.a4-sheet');
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        for (let i = 0; i < pages.length; i++) {
+            const canvas = await html2canvas(pages[i], {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                logging: false
+            });
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            if (i > 0) pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+        }
+
+        document.body.classList.remove('exporting');
+        pdf.save('ملف_إنجاز_نظيف.pdf');
+    }
+
+    adjustScaling();
+    updatePageNumbers();
+</script>
+
+</body>
+</html>
