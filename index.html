@@ -98,6 +98,16 @@
         .excellent { background: #dcfce7; color: #166534; } .very-good { background: #dbeafe; color: #1e40af; } .good { background: #fef3c7; color: #92400e; } .fail { background: #fee2e2; color: #991b1b; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- ستايل البطاقات الاحترافية --- */
+        .lesson-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .lesson-card-item { background: white; border-radius: 20px; padding: 20px; border: 1px solid #e2e8f0; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 10px; cursor: pointer; }
+        .lesson-card-item:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .l-icon { width: 50px; height: 50px; border-radius: 12px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .l-title { margin: 0; font-weight: 900; font-size: 16px; color: var(--primary); }
+        .l-desc { margin: 0; font-size: 12px; color: #64748b; font-weight: 600; line-height: 1.4; }
+
         @media (max-width: 992px) { .bottom-nav { display: flex; } }
     </style>
 </head>
@@ -180,6 +190,7 @@
         <nav class="side-nav">
             <div class="nav-link active" id="l-lessons" onclick="switchTab('lessons')"><i class="fas fa-book-open"></i> دروسي</div>
             <div class="nav-link" id="l-exams" onclick="switchTab('exams')"><i class="fas fa-graduation-cap"></i> اختباراتي</div>
+            <div class="nav-link" id="l-zoom" onclick="switchTab('zoom')"><i class="fas fa-video"></i> شروحات زووم</div>
             <div class="nav-link" id="l-msgs" onclick="switchTab('msgs')"><i class="fas fa-envelope"></i> الرسائل</div>
         </nav>
     </aside>
@@ -199,6 +210,7 @@
     <nav class="bottom-nav">
         <div class="b-nav-item active" id="b-lessons" onclick="switchTab('lessons')"><i class="fas fa-book-reader"></i><span>دروسي</span></div>
         <div class="b-nav-item" id="b-exams" onclick="switchTab('exams')"><i class="fas fa-edit"></i><span>الاختبارات</span></div>
+        <div class="b-nav-item" id="b-zoom" onclick="switchTab('zoom')"><i class="fas fa-video"></i><span>زووم</span></div>
         <div class="b-nav-item" id="b-msgs" onclick="switchTab('msgs')"><i class="fas fa-comment-dots"></i><span>الرسائل</span></div>
     </nav>
 </div>
@@ -356,6 +368,11 @@
         return { text: "يحتاج تحسين ✍️", class: "fail" };
     }
 
+    /* --- وظيفة النقر على البطاقة للمشتركين فقط --- */
+    window.restrictAccess = () => {
+        showAlert("هذا المحتوى متاح للمشتركين فقط 🔒", "warning");
+    };
+
     /* --- بوت الدردشة الذكي --- */
     const botBrain = {
         "ما هو تطبيق ham.school؟": "منصة Ham.school هي بوابتك نحو التميز الدراسي، نركز على تقديم شروحات مبسطة، اختبارات ذكية، ومتابعة دقيقة لمستوى الطالب لضمان الوصول للقمة.",
@@ -403,7 +420,13 @@
         document.querySelectorAll('.nav-link, .b-nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById(`l-${tab}`)?.classList.add('active');
         document.getElementById(`b-${tab}`)?.classList.add('active');
-        document.getElementById('tabTitle').innerText = tab === 'exams' ? "اختباراتي" : (tab === 'msgs' ? "مساعد النخبة" : "دروسي");
+        
+        let title = "دروسي";
+        if(tab === 'exams') title = "اختباراتي";
+        if(tab === 'msgs') title = "مساعد النخبة";
+        if(tab === 'zoom') title = "شروحات زووم";
+        document.getElementById('tabTitle').innerText = title;
+        
         document.getElementById('welcomeSection').style.display = 'block';
         actions.innerHTML = '';
         
@@ -429,6 +452,79 @@
             return;
         }
 
+        if(tab === 'zoom') {
+            display.innerHTML = `
+                <div style="text-align:center; padding:50px; background:white; border-radius:25px; border:1px solid #e2e8f0;">
+                    <i class="fas fa-video-slash" style="font-size:50px; color:var(--primary); margin-bottom:20px;"></i>
+                    <h2 style="color:var(--primary); font-weight:900;">قريباً..</h2>
+                    <p style="font-weight:700; color:#64748b;">خدمة الشروحات المباشرة عبر زووم ستكون متاحة للمشتركين فقط خلال الفترة القادمة.</p>
+                    <button class="btn-start-quiz" style="margin-top:20px;" onclick="switchTab('lessons')">العودة للدروس</button>
+                </div>
+            `;
+            return;
+        }
+
+        if(tab === 'lessons') {
+            display.innerHTML = '<div class="shimmer-item"></div><div class="shimmer-item"></div><div class="shimmer-item"></div>';
+            checkConnection();
+            setTimeout(() => {
+                display.innerHTML = `
+                <div class="lesson-grid">
+                    <div class="lesson-card-item" onclick="restrictAccess()">
+                        <div class="l-icon"><i class="fas fa-code"></i></div>
+                        <h3 class="l-title">تعلم البرمجة</h3>
+                        <p class="l-desc">انطلق في عالم التكنولوجيا وتعلم لغات المستقبل من الصفر حتى الاحتراف.</p>
+                    </div>
+                    <div class="lesson-card-item" onclick="restrictAccess()">
+                        <div class="l-icon"><i class="fas fa-language"></i></div>
+                        <h3 class="l-title">قواعد اللغة الإنجليزية</h3>
+                        <p class="l-desc">شرح كامل لجميع أزمنة وقواعد الإنجليزي بأسلوب سهل.</p>
+                    </div>
+                    <div class="lesson-card-item" onclick="restrictAccess()">
+                        <div class="l-icon"><i class="fas fa-spell-check"></i></div>
+                        <h3 class="l-title">أهم 100 كلمة بالإنجليزية</h3>
+                        <p class="l-desc">قائمة بالكلمات الأكثر استخداماً لبناء حصيلة لغوية قوية.</p>
+                    </div>
+                    <div class="lesson-card-item" onclick="restrictAccess()">
+                        <div class="l-icon"><i class="fas fa-file-invoice"></i></div>
+                        <h3 class="l-title">إنشاء ملف إنجاز (معلم/ة)</h3>
+                        <p class="l-desc">قم بإنشاء ملف الإنجاز بتصميم احترافي وتحميل سريع جداً بضغطة زر.</p>
+                    </div>
+                    <div class="lesson-card-item" onclick="restrictAccess()">
+                        <div class="l-icon"><i class="fas fa-certificate"></i></div>
+                        <h3 class="l-title">صنع شهادات التفوق</h3>
+                        <p class="l-desc">صمم شهادات شكر وتقدير مذهلة لطلابك المتميزين في ثوانٍ.</p>
+                    </div>
+                    <div class="lesson-card-item" onclick="restrictAccess()">
+                        <div class="l-icon"><i class="fas fa-search"></i></div>
+                        <h3 class="l-title">أبحاث هامة للجامعيين</h3>
+                        <p class="l-desc">مصادر وأبحاث هامة تهم الطلاب الجامعيين في كل المجالات العلمية والأدبية.</p>
+                    </div>
+                    <div class="lesson-card-item" onclick="restrictAccess()">
+                        <div class="l-icon"><i class="fas fa-pen-nib"></i></div>
+                        <h3 class="l-title">أهم قواعد النحو في لغتي</h3>
+                        <p class="l-desc">تأسيس شامل في قواعد النحو والإعراب للتميز الدراسي.</p>
+                    </div>
+                    <div class="lesson-card-item" onclick="restrictAccess()">
+                        <div class="l-icon"><i class="fas fa-brain"></i></div>
+                        <h3 class="l-title">أهم أسئلة القدرات</h3>
+                        <p class="l-desc">تجميعات وشروحات لأهم الأسئلة المتكررة في اختبار القدرات.</p>
+                    </div>
+                    <div class="lesson-card-item" onclick="restrictAccess()">
+                        <div class="l-icon"><i class="fas fa-microscope"></i></div>
+                        <h3 class="l-title">ملخصات العلوم الممتعة</h3>
+                        <p class="l-desc">تبسيط للمفاهيم العلمية بخرائط ذهنية تفاعلية.</p>
+                    </div>
+                    <div class="lesson-card-item" onclick="restrictAccess()">
+                        <div class="l-icon"><i class="fas fa-calculator"></i></div>
+                        <h3 class="l-title">مهارات الحساب الذهني</h3>
+                        <p class="l-desc">تعلم كيف تجري العمليات الحسابية بسرعة البرق.</p>
+                    </div>
+                </div>`;
+            }, 600);
+            return;
+        }
+
         if(user.isGuest) {
             display.innerHTML = '<div style="text-align:center; padding:50px; color:#94a3b8;"><i class="fas fa-lock" style="font-size:40px; margin-bottom:15px;"></i><p>المحتوى متاح للطلاب المشتركين فقط</p></div>';
             return;
@@ -437,7 +533,6 @@
         if(tab === 'exams') {
             if(!checkConnection()) return display.innerHTML = '<p style="text-align:center; color:var(--danger);">رجاء الاتصال بالإنترنت لعرض الاختبارات</p>';
             actions.innerHTML = `<button class="history-btn" onclick="showGradeHistory()"><i class="fas fa-award"></i> سجل إنجازاتي</button>`;
-            // تفعيل Shimmer عند التحميل
             display.innerHTML = '<div class="shimmer-item"></div><div class="shimmer-item"></div><div class="shimmer-item"></div>';
             try {
                 const [examsSnap, resultsSnap] = await Promise.all([get(child(ref(db), 'exams')), get(child(ref(db), `results/${user.username}`))]);
@@ -455,7 +550,7 @@
                 display.innerHTML = hasExams ? html + '</div>' : '<p style="text-align:center;">لا توجد اختبارات متاحة حالياً</p>';
                 window.examsCache = exams;
             } catch (e) { display.innerHTML = "فشل التحميل"; }
-        } else { display.innerHTML = '<div style="text-align:center; padding:50px; color:#94a3b8;"><p>قريباً في Ham.school...</p></div>'; }
+        }
     };
 
     window.showGradeHistory = async () => {
