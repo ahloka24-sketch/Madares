@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ham.school | موسوعة الأزمنة الـ 12</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #4f46e5; --secondary: #1e293b; --accent: #06b6d4; --bg: #f8fafc; }
+        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { background: var(--bg); margin: 0; color: #334155; line-height: 1.6; }
+
+        /* شريط الإنترنت والشيمر */
+        #offlineBar { position: fixed; top: 0; left: 0; right: 0; background: #ef4444; color: white; text-align: center; padding: 8px; font-weight: bold; z-index: 10000; display: none; }
+        .shimmer { height: 80px; background: #e2e8f0; border-radius: 15px; margin-bottom: 15px; position: relative; overflow: hidden; }
+        .shimmer::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0)); animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+        header { background: white; padding: 30px 20px; text-align: center; border-bottom: 3px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .container { max-width: 900px; margin: 20px auto; padding: 0 15px 120px; }
+
+        /* الهيكل الشجري */
+        .tense-group { margin-bottom: 25px; }
+        .group-title { background: var(--secondary); color: white; padding: 18px 25px; border-radius: 15px; font-weight: 900; font-size: 19px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .tenses-list { display: none; padding-top: 15px; }
+        
+        .tense-card { background: white; border-radius: 15px; margin-bottom: 12px; border-right: 6px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.02); overflow: hidden; }
+        .tense-header { padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: var(--primary); }
+        .tense-body { display: none; padding: 25px; border-top: 1px solid #f1f5f9; background: #fff; }
+
+        /* المحتوى الداخلي */
+        .section-box { background: #f0f4ff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #dbeafe; }
+        .en-desc { direction: ltr; text-align: left; color: var(--secondary); font-weight: 700; display: block; margin-bottom: 5px; font-size: 15px; }
+        .ar-desc { color: #57606f; font-size: 14px; font-weight: 600; display: block; }
+        
+        .formula { background: linear-gradient(90deg, var(--primary), #6366f1); color: white; padding: 12px; border-radius: 10px; text-align: center; font-weight: 900; margin: 15px 0; direction: ltr; font-size: 17px; }
+        
+        .examples-grid { display: grid; gap: 10px; margin-top: 15px; }
+        .ex-item { background: #f8fafc; padding: 12px; border-radius: 10px; border-left: 4px solid var(--accent); direction: ltr; text-align: left; }
+        .ex-item span { display: block; font-size: 15px; color: var(--secondary); font-weight: 700; }
+        .ex-item small { color: #64748b; font-style: normal; font-family: 'Tajawal'; font-weight: 600; display: block; margin-top: 4px; }
+
+        /* التحكم في الفتح والغلق */
+        .active-group > .tenses-list { display: block; }
+        .active-tense > .tense-body { display: block; }
+        .rotate { transition: 0.4s; }
+        .active-group > .group-title .rotate, .active-tense > .tense-header .rotate { transform: rotate(180deg); }
+
+        /* الزر السفلي المحدث */
+        .back-nav { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: white; width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 10px 30px rgba(79, 70, 229, 0.4); border: 2px solid var(--primary); z-index: 1000; text-decoration: none; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .back-nav:hover { background: var(--primary); color: white; transform: translateX(-50%) scale(1.1); }
+    </style>
+</head>
+<body>
+
+<div id="offlineBar"><i class="fas fa-wifi-slash"></i> تنبيه: أنت تتصفح القواعد بدون إنترنت</div>
+
+<header>
+    <h1 style="margin:0; font-weight:900; color:var(--primary); letter-spacing: -1px;">Ham.school Grammar</h1>
+    <p style="margin:5px 0; color:var(--secondary); font-weight:800;">الموسوعة الكاملة للأزمنة الـ 12</p>
+</header>
+
+<div class="container">
+    <div id="loading">
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+    </div>
+
+    <div id="mainData" style="display: none;">
+        
+        <div class="tense-group">
+            <div class="group-title" onclick="toggleGroup(this)">
+                1. أزمنة المضارع (Present Tenses)
+                <i class="fas fa-chevron-down rotate"></i>
+            </div>
+            <div class="tenses-list">
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Present Simple (المضارع البسيط) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">Used for facts, daily habits, and permanent states.</span>
+                            <span class="ar-desc">يُستخدم للحقائق العلمية، العادات اليومية، والحالات الثابتة.</span>
+                        </div>
+                        <div class="formula">Subject + Verb 1 (+ s/es with He/She/It)</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>Water boils at 100°C.</span><small>يغلي الماء عند 100 درجة (حقيقة).</small></div>
+                            <div class="ex-item"><span>He drinks coffee every morning.</span><small>هو يشرب القهوة كل صباح (عادة).</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Present Continuous (المضارع المستمر) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">Actions happening right now or temporary actions.</span>
+                            <span class="ar-desc">أحداث تقع الآن في لحظة الكلام أو مواقف مؤقتة.</span>
+                        </div>
+                        <div class="formula">Subject + am/is/are + Verb-ing</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>I am studying for my exam now.</span><small>أنا أذاكر لاختباري الآن.</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Present Perfect (المضارع التام) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">Past actions with results in the present. (No specific time).</span>
+                            <span class="ar-desc">أحداث بدأت في الماضي ولها أثر في الحاضر (الوقت غير مهم).</span>
+                        </div>
+                        <div class="formula">Subject + have/has + Verb 3 (P.P)</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>I have lost my keys.</span><small>لقد فقدت مفاتيحي (النتيجة: لا أستطيع الدخول الآن).</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Present Perfect Continuous (المضارع التام المستمر) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">Started in the past and still continuing until now.</span>
+                            <span class="ar-desc">حدث بدأ في الماضي وما زال مستمراً حتى هذه اللحظة.</span>
+                        </div>
+                        <div class="formula">Subject + have/has been + Verb-ing</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>It has been raining for two hours.</span><small>إنها تمطر منذ ساعتين (وما زالت تمطر).</small></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tense-group">
+            <div class="group-title" onclick="toggleGroup(this)">
+                2. أزمنة الماضي (Past Tenses)
+                <i class="fas fa-chevron-down rotate"></i>
+            </div>
+            <div class="tenses-list">
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Past Simple (الماضي البسيط) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">Completed actions at a specific time in the past.</span>
+                            <span class="ar-desc">أفعال انتهت تماماً في وقت محدد ومعروف في الماضي.</span>
+                        </div>
+                        <div class="formula">Subject + Verb 2 (Past Form)</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>I watched a movie yesterday.</span><small>شاهدت فيلماً بالأمس.</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Past Continuous (الماضي المستمر) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">Actions that were in progress at a specific time in the past.</span>
+                            <span class="ar-desc">أحداث كانت مستمرة في الماضي عندما قطعها حدث آخر.</span>
+                        </div>
+                        <div class="formula">Subject + was/were + Verb-ing</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>I was sleeping when the phone rang.</span><small>كنت نائماً عندما رن الهاتف.</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Past Perfect (الماضي التام) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">An action that happened before another action in the past.</span>
+                            <span class="ar-desc">يُسمى "ماضي الماضي"، حدث وقع قبل حدث آخر وكلاهما في الماضي.</span>
+                        </div>
+                        <div class="formula">Subject + had + Verb 3 (P.P)</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>The train had left before I arrived.</span><small>كان القطار قد غادر قبل أن أصل.</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Past Perfect Continuous (الماضي التام المستمر) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">An action that was continuing until another point in the past.</span>
+                            <span class="ar-desc">حدث استمر لفترة قبل وقوع حدث آخر في الماضي.</span>
+                        </div>
+                        <div class="formula">Subject + had been + Verb-ing</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>He had been working all day before he fell ill.</span><small>كان يعمل طوال اليوم قبل أن يمرض.</small></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tense-group">
+            <div class="group-title" onclick="toggleGroup(this)">
+                3. أزمنة المستقبل (Future Tenses)
+                <i class="fas fa-chevron-down rotate"></i>
+            </div>
+            <div class="tenses-list">
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Future Simple (المستقبل البسيط) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">Predictions, promises, or spontaneous decisions.</span>
+                            <span class="ar-desc">تنبؤات مستقبيلة، وعود، أو قرارات مفاجئة.</span>
+                        </div>
+                        <div class="formula">Subject + will + Verb (Base)</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>It will rain tomorrow.</span><small>سوف تمطر غداً.</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Future Continuous (المستقبل المستمر) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">An action that will be in progress at a time in the future.</span>
+                            <span class="ar-desc">حدث سيكون مستمراً في وقت معين في المستقبل.</span>
+                        </div>
+                        <div class="formula">Subject + will be + Verb-ing</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>At this time tomorrow, I will be flying to London.</span><small>في مثل هذا الوقت غداً، سأكون محلقاً إلى لندن.</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Future Perfect (المستقبل التام) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">An action that will be completed before a point in the future.</span>
+                            <span class="ar-desc">حدث سيكون قد اكتمل تماماً قبل وقت معين في المستقبل.</span>
+                        </div>
+                        <div class="formula">Subject + will have + Verb 3 (P.P)</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>I will have finished my project by Monday.</span><small>سأكون قد أنهيت مشروعي بحلول يوم الاثنين.</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tense-card">
+                    <div class="tense-header" onclick="toggleTense(this)">Future Perfect Continuous (المستقبل التام المستمر) <i class="fas fa-plus rotate"></i></div>
+                    <div class="tense-body">
+                        <div class="section-box">
+                            <span class="en-desc">Emphasizes the duration of an action until a future time.</span>
+                            <span class="ar-desc">يركز على طول مدة استمرار الفعل حتى نقطة معينة في المستقبل.</span>
+                        </div>
+                        <div class="formula">Subject + will have been + Verb-ing</div>
+                        <div class="examples-grid">
+                            <div class="ex-item"><span>By next year, I will have been living here for 10 years.</span><small>بحلول العام القادم، سأكون قد عشت هنا لمدة 10 سنوات.</small></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<a href="index.html" class="back-nav"><i class="fas fa-home"></i></a>
+
+<script>
+    window.onload = () => {
+        checkConnectivity();
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('mainData').style.display = 'block';
+        }, 1200);
+    };
+
+    function toggleGroup(el) { el.parentElement.classList.toggle('active-group'); }
+    function toggleTense(el) { el.parentElement.classList.toggle('active-tense'); }
+
+    function checkConnectivity() {
+        const bar = document.getElementById('offlineBar');
+        if(!navigator.onLine) bar.style.display = 'block';
+        window.addEventListener('offline', () => bar.style.display = 'block');
+        window.addEventListener('online', () => bar.style.display = 'none');
+    }
+</script>
+</body>
+</html>
