@@ -16,6 +16,14 @@
         body { background: var(--bg); margin: 0; overflow-x: hidden; color: #1e293b; }
         .hidden { display: none !important; }
 
+        /* --- شريط انقطاع الإنترنت --- */
+        #offlineBar { position: fixed; top: 0; left: 0; right: 0; background: var(--danger); color: white; text-align: center; padding: 10px; font-weight: 800; z-index: 20000; display: none; animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+
+        /* --- Shimmer Effect --- */
+        .shimmer-item { height: 80px; background: #eceef1; background-image: linear-gradient(to right, #eceef1 0%, #f6f7f8 20%, #eceef1 40%, #eceef1 100%); background-repeat: no-repeat; background-size: 800px 100px; display: block; border-radius: 20px; animation: shimmer 1.5s linear infinite forwards; margin-bottom: 12px; }
+        @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+
         /* --- شاشة الدخول --- */
         #loginPage { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; position: fixed; width: 100%; z-index: 9999; overflow-y: auto; padding: 20px 0; }
         .login-card { width: 90%; max-width: 380px; text-align: center; padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); background: #fff; }
@@ -94,6 +102,8 @@
     </style>
 </head>
 <body>
+
+<div id="offlineBar"><i class="fas fa-wifi-slash"></i> رجاء الاتصال بالإنترنت ..</div>
 
 <div id="customAlert">
     <span class="alert-icon" id="alertIcon"></span>
@@ -207,6 +217,19 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    /* --- إدارة حالة الإنترنت --- */
+    function checkConnection() {
+        if (!navigator.onLine) {
+            document.getElementById('offlineBar').style.display = 'block';
+            return false;
+        } else {
+            document.getElementById('offlineBar').style.display = 'none';
+            return true;
+        }
+    }
+    window.addEventListener('online', checkConnection);
+    window.addEventListener('offline', checkConnection);
+
     const countries = [
         {c: "+966", n: "🇸🇦"}, {c: "+971", n: "🇦🇪"}, {c: "+965", n: "🇰🇼"}, {c: "+968", n: "🇴🇲"}, 
         {c: "+974", n: "🇶🇦"}, {c: "+973", n: "🇧🇭"}, {c: "+20", n: "🇪🇬"}, {c: "+962", n: "🇯🇴"},
@@ -263,6 +286,7 @@
     };
 
     window.submitJoinRequest = async () => {
+        if(!checkConnection()) return showAlert("لا يوجد اتصال بالإنترنت", "error");
         const name = document.getElementById('regName').value.trim();
         const phone = document.getElementById('regPhone').value.trim();
         if(!name || !selectedData.grade || !phone) return showAlert("أكمل البيانات", "error");
@@ -285,6 +309,7 @@
     };
 
     window.login = async () => {
+        if(!checkConnection()) return showAlert("لا يوجد اتصال بالإنترنت", "error");
         const u = document.getElementById('username').value.trim();
         const p = document.getElementById('password').value.trim();
         if(!u || !p) return showAlert("يرجى ملء الخانات", "error");
@@ -320,6 +345,7 @@
         document.getElementById('uGradeSide').innerText = user.grade;
         document.getElementById('welcomeText').innerText = `مرحباً بك يا ${user.name} 👋 😍`;
         switchTab('lessons');
+        checkConnection();
     }
 
     function getRating(score, total) {
@@ -334,13 +360,14 @@
     const botBrain = {
         "ما هو تطبيق ham.school؟": "منصة Ham.school هي بوابتك نحو التميز الدراسي، نركز على تقديم شروحات مبسطة، اختبارات ذكية، ومتابعة دقيقة لمستوى الطالب لضمان الوصول للقمة.",
         "كيف أبدأ الاختبار؟": "سهلة جداً! انتقل لتبويب 'اختباراتي' من الأسفل، ستجد قائمة بالاختبارات المتاحة لصفك، اضغط على 'ابدأ الآن' واستمتع برحلة التحدي.",
-        "كيف أعرف درجاتي القديمة؟": "في صفحة 'اختباراتي'، ستجد زر بالأعلى اسمه 'سجل إنجازاتي'، هناك تظهر لك كل درجاتك وتقييمك في كل اختبار خضته.",
+        "كيف أعرف درجاتي القديمة؟": "في صفحة 'اختباراتي' ستجد زر بالأعلى اسمه 'سجل إنجازاتي'، هناك تظهر لك كل درجاتك وتقييمك في كل اختبار خضته.",
         "كيف أتواصل مع الدعم؟": "نحن معك دائماً! يمكنك الضغط على أيقونة الواتساب في صفحة الدخول، أو مراسلة البوت هنا لأي استفسار تقني.",
         "هل يوجد دروس فيديو؟": "نعم، يتم رفع الدروس دورياً في تبويب 'دروسي' لتتمكن من مراجعة المادة العلمية في أي وقت ومن أي مكان.",
         "سلام": "وعليكم السلام يا بطل! كيف يمكن لـ Ham.school مساعدتك اليوم؟"
     };
 
     window.sendMessage = (text = null) => {
+        if(!checkConnection()) return showAlert("عذراً، تحتاج للاتصال بالإنترنت للمراسلة", "error");
         const input = document.getElementById('chatInput');
         const msg = text || input.value.trim();
         if(!msg) return;
@@ -348,7 +375,6 @@
         appendMsg(msg, 'user');
         input.value = '';
 
-        // رد البوت
         setTimeout(() => {
             const typingMsg = appendMsg("جاري التفكير...", 'bot');
             setTimeout(() => {
@@ -409,8 +435,10 @@
         }
 
         if(tab === 'exams') {
+            if(!checkConnection()) return display.innerHTML = '<p style="text-align:center; color:var(--danger);">رجاء الاتصال بالإنترنت لعرض الاختبارات</p>';
             actions.innerHTML = `<button class="history-btn" onclick="showGradeHistory()"><i class="fas fa-award"></i> سجل إنجازاتي</button>`;
-            display.innerHTML = '<div class="loader"></div>';
+            // تفعيل Shimmer عند التحميل
+            display.innerHTML = '<div class="shimmer-item"></div><div class="shimmer-item"></div><div class="shimmer-item"></div>';
             try {
                 const [examsSnap, resultsSnap] = await Promise.all([get(child(ref(db), 'exams')), get(child(ref(db), `results/${user.username}`))]);
                 const exams = examsSnap.val() || {};
@@ -431,9 +459,10 @@
     };
 
     window.showGradeHistory = async () => {
+        if(!checkConnection()) return showAlert("تحتاج لاتصال بالإنترنت", "error");
         const user = JSON.parse(localStorage.getItem('user'));
         const display = document.getElementById('mainDisplay');
-        display.innerHTML = '<div class="loader"></div>';
+        display.innerHTML = '<div class="shimmer-item"></div><div class="shimmer-item"></div>';
         const [examsSnap, resultsSnap] = await Promise.all([get(child(ref(db), 'exams')), get(child(ref(db), `results/${user.username}`))]);
         const exams = examsSnap.val() || {};
         const results = resultsSnap.val() || {};
@@ -447,6 +476,7 @@
     };
 
     window.takeExam = (id) => {
+        if(!checkConnection()) return showAlert("انقطع الاتصال بالإنترنت!", "error");
         const exam = window.examsCache[id];
         const display = document.getElementById('mainDisplay');
         document.getElementById('welcomeSection').style.display = 'none';
@@ -459,6 +489,7 @@
     };
 
     window.finishExam = async (examId) => {
+        if(!checkConnection()) return showAlert("لا يمكن إرسال الحل بدون إنترنت!", "error");
         const exam = window.examsCache[examId];
         const user = JSON.parse(localStorage.getItem('user'));
         let score = 0;
@@ -469,7 +500,7 @@
         try {
             await set(ref(db, `results/${user.username}/${examId}`), { score, total: exam.questions.length, date: Date.now() });
             showAlert("تم حفظ إجاباتك في Ham.school!"); switchTab('exams');
-        } catch(e) { showAlert("خطأ", "error"); }
+        } catch(e) { showAlert("خطأ في الإرسال", "error"); }
     };
 
     window.toggleSidebar = (f) => {
@@ -481,6 +512,7 @@
 
     const saved = localStorage.getItem('user');
     if(saved) startApp(JSON.parse(saved));
+    checkConnection();
 </script>
 </body>
 </html>
