@@ -2,232 +2,219 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>محرر ملف الإنجاز الاحترافي</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&family=Tajawal:wght@500&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamsa Elite | بوابة الطالب</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { 
-            --turquoise: #008080; 
-            --dark: #1a1a1a; 
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --sidebar-width: 280px;
         }
-        * { box-sizing: border-box; font-weight: normal !important; }
+
+        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.3s; }
+        body { background: var(--bg); margin: 0; overflow-x: hidden; }
+
+        /* --- صفحة تسجيل الدخول --- */
+        #loginPage { height: 100vh; display: flex; align-items: center; justify-content: center; background: #fff; position: fixed; width: 100%; z-index: 9999; }
+        .login-card { width: 90%; max-width: 400px; text-align: center; padding: 40px 30px; border: 1px solid #eee; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+        .input-field { width: 100%; padding: 15px; margin: 10px 0; border-radius: 15px; border: 2px solid #eee; outline: none; text-align: right; font-weight: bold; font-size: 16px; }
+        .btn-login { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 15px; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        .wa-support { margin-top: 25px; display: block; color: var(--success); text-decoration: none; font-weight: 800; cursor: pointer; font-size: 14px; }
+
+        /* --- لوحة التحكم --- */
+        #dashboardPage { display: none; min-height: 100vh; width: 100%; }
+
+        /* القائمة الجانبية (Sidebar) */
+        .sidebar { 
+            width: var(--sidebar-width); background: white; height: 100vh; 
+            position: fixed; right: 0; top: 0; border-left: 1px solid #e2e8f0;
+            display: flex; flex-direction: column; z-index: 1000;
+        }
         
-        body { 
-            margin: 0; background: #2c2c2c; 
-            font-family: 'Tajawal', sans-serif; 
-            display: flex; flex-direction: column; align-items: center;
+        .profile-area { 
+            padding: 30px 15px; text-align: center; background: var(--primary-light); 
+            position: relative; overflow: hidden; border-bottom: 2px solid #eef2ff;
         }
-
-        .header-tools {
-            position: fixed; top: 0; width: 100%; background: #fff;
-            padding: 12px; display: flex; justify-content: center;
-            gap: 12px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-family: 'Tajawal'; font-size: 14px; }
-        .btn-add { background: #27ae60; color: white; }
-        .btn-pdf { background: #e74c3c; color: white; }
-
-        #content-area { margin-top: 70px; width: 100%; display: flex; flex-direction: column; align-items: center; }
-
-        .page-container {
-            width: 100vw; display: flex; justify-content: center;
-            height: calc(100vw * 1.414); margin-bottom: 25px;
-        }
-
-        .a4-sheet {
-            width: 794px; height: 1123px; background: white;
-            position: relative; display: flex; flex-direction: column;
-            padding: 80px 60px; flex-shrink: 0; transform-origin: top center;
-        }
-
-        .frame {
-            position: absolute; top: 25px; left: 25px; right: 25px; bottom: 25px;
-            border: 3px double var(--turquoise); pointer-events: none;
-        }
-
-        /* ----- الغلاف ----- */
-        .cover-mode { justify-content: center; align-items: center; text-align: center; }
-        .cover-title { 
-            color: var(--turquoise); 
-            font-size: 100px; 
-            font-family: 'Cairo'; 
-            line-height: 1.5;
-        }
-        .gold-divider { width: 40%; height: 2px; background: var(--turquoise); margin: 20px auto 40px; }
-
-        /* ----- الصفحات الداخلية ----- */
-        .page-header { text-align: right; margin-bottom: 30px; }
-        .page-header h2 { 
-            display: inline-block;
-            background-color: var(--turquoise); 
-            color: white !important; 
-            font-family: 'Cairo'; 
-            font-size: 38px; 
-            padding: 5px 30px; 
-            border-radius: 50px 0 0 50px;
-            line-height: 1.8;
-        }
-
-        /* الحقول القابلة للتعديل */
-        [contenteditable="true"] {
-            outline: none; background: transparent;
-            font-family: 'Cairo', sans-serif;
-            display: block; width: 95%; margin: 0 auto;
-            word-wrap: break-word; padding: 10px;
-        }
-
-        .editable-name, .editable-manager { font-size: 36px; color: #333; text-align: center; }
-        .editable-sub { 
-            font-size: 32px; text-align: right; color: #444; 
-            margin-top: 15px; border-right: 4px solid var(--turquoise); 
-            padding-right: 15px !important; 
-        }
-
-        /* Placeholder: يختفي تلقائياً عند الطباعة */
-        [contenteditable="true"]:empty:before { 
-            content: attr(data-placeholder); 
-            color: #aaa; 
-        }
-
-        .img-container {
-            flex: 1; display: flex; justify-content: center; align-items: center;
-            border: 2px dashed #ccc; position: relative; margin: 20px 0;
-            background: #fdfdfd; overflow: hidden; border-radius: 10px;
-        }
-        .img-container img { width: 100%; height: 100%; object-fit: contain; z-index: 1; }
-        .file-input { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; }
-        .placeholder-text { position: absolute; color: #999; pointer-events: none; font-size: 22px; }
-
-        .footer-num { text-align: center; font-size: 18px; position: absolute; bottom: 50px; width: 100%; left: 0; color: #777; }
+        .student-vector { position: absolute; top: -10px; left: -10px; width: 90px; opacity: 0.12; transform: rotate(-15deg); }
         
-        .del-btn {
-            position: absolute; top: 10px; left: 10px; background: #ff4444;
-            color: white; border: none; padding: 12px 20px; border-radius: 4px;
-            cursor: pointer; z-index: 100; font-size: 20px;
-        }
+        .student-tags { position: relative; z-index: 3; display: flex; justify-content: center; gap: 6px; margin-bottom: 10px; }
+        .tag { background: white; padding: 3px 10px; border-radius: 50px; font-size: 10px; font-weight: 900; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .stars { color: var(--warning); font-size: 12px; margin-bottom: 12px; position: relative; z-index: 3; }
 
-        /* وضع التصدير PDF: إخفاء العناصر غير المرغوبة */
-        .exporting .page-container { height: auto !important; width: auto !important; }
-        .exporting .a4-sheet { transform: scale(1) !important; margin: 0 !important; }
-        .exporting .del-btn, .exporting .file-input, .exporting .placeholder-text { display: none !important; }
-        
-        /* أهم تعديل: إخفاء الـ placeholder تماماً في الـ PDF */
-        .exporting [contenteditable="true"]:empty:before {
-            content: "" !important;
+        .profile-img { width: 85px; height: 85px; border-radius: 50%; border: 4px solid white; position: relative; z-index: 2; box-shadow: 0 5px 15px rgba(0,0,0,0.1); background: #eee; object-fit: cover; }
+        .profile-name { margin: 12px 0 2px; font-weight: 900; color: #1e293b; font-size: 17px; }
+
+        .side-nav { flex: 1; padding: 15px; }
+        .nav-link { 
+            display: flex; align-items: center; gap: 15px; padding: 14px; 
+            border-radius: 15px; color: #64748b; font-weight: 700; 
+            cursor: pointer; margin-bottom: 6px; text-decoration: none; font-size: 15px;
+        }
+        .nav-link i { width: 22px; font-size: 18px; text-align: center; }
+        .nav-link.active, .nav-link:hover { background: var(--primary-light); color: var(--primary); }
+
+        .logout-link { color: var(--danger) !important; border-top: 1px solid #f1f5f9; padding: 20px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+
+        /* منطقة المحتوى */
+        .main-content { margin-right: var(--sidebar-width); flex: 1; padding: 35px; width: calc(100% - var(--sidebar-width)); }
+        .welcome-card { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.15); }
+
+        /* القائمة السفلية للجوال */
+        .bottom-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eee; padding: 12px; z-index: 1001; }
+        .b-nav-item { text-align: center; color: #94a3b8; font-size: 11px; font-weight: 800; flex: 1; cursor: pointer; }
+        .b-nav-item i { display: block; font-size: 22px; margin-bottom: 4px; }
+        .b-nav-item.active { color: var(--primary); }
+
+        @media (max-width: 992px) {
+            .sidebar { display: none; }
+            .main-content { margin-right: 0; width: 100%; padding-bottom: 100px; }
+            .bottom-bar { display: flex; justify-content: space-around; }
         }
     </style>
 </head>
 <body>
 
-<div class="header-tools">
-    <button class="btn btn-add" onclick="createNewPage()">➕ إضافة صفحة</button>
-    <button class="btn btn-pdf" onclick="generateFinalPDF()">📥 تحميل PDF</button>
-</div>
-
-<div id="content-area">
-    <div class="page-container">
-        <div class="a4-sheet cover-mode">
-            <div class="frame"></div>
-            <h1 class="cover-title">ملف الإنجاز</h1>
-            <div class="gold-divider"></div>
-            <div class="input-wrapper" style="width: 100%;">
-                <div class="editable-name" contenteditable="true" data-placeholder="اسم المعلم / المعلمة"></div>
-                <div class="editable-manager" contenteditable="true" data-placeholder="اسم مدير المدرسة"></div>
-            </div>
-            <div class="footer-num">1</div>
-        </div>
+<div id="loginPage">
+    <div class="login-card">
+        <h1 style="color:var(--primary); font-weight:900; margin:0;">HAMSA ELITE</h1>
+        <p style="color:#64748b; font-weight:bold; margin-bottom:30px;">نظام إدارة التعلم</p>
+        <input type="text" id="username" class="input-field" placeholder="اسم المستخدم">
+        <input type="password" id="password" class="input-field" placeholder="كلمة المرور">
+        <button class="btn-login" onclick="handleLogin()">تسجيل الدخول</button>
+        <a class="wa-support" onclick="window.open('https://wa.me/966534553706', '_blank')">
+            <i class="fab fa-whatsapp"></i> هل نسيت بياناتك؟ تواصل مع المعلم
+        </a>
     </div>
 </div>
 
-<script>
-    function adjustScaling() {
-        const sheets = document.querySelectorAll('.a4-sheet');
-        const screenWidth = window.innerWidth;
-        const scaleValue = screenWidth / 794;
-        sheets.forEach(sheet => {
-            sheet.style.transform = `scale(${scaleValue})`;
-            sheet.parentElement.style.height = (1123 * scaleValue) + 'px';
-        });
-    }
-
-    window.addEventListener('resize', adjustScaling);
-
-    function createNewPage() {
-        const area = document.getElementById('content-area');
-        const container = document.createElement('div');
-        container.className = 'page-container';
-        
-        container.innerHTML = `
-            <div class="a4-sheet">
-                <div class="frame"></div>
-                <button class="del-btn" onclick="this.closest('.page-container').remove(); updatePageNumbers();">حذف</button>
-                <div class="page-header">
-                    <h2>ملف الإنجاز</h2>
-                    <div class="editable-sub" contenteditable="true" data-placeholder="العنوان الفرعي (مثلاً: السيرة الذاتية)"></div>
-                </div>
-                <div class="img-container">
-                    <span class="placeholder-text">اضغط لإرفاق الصورة</span>
-                    <input type="file" class="file-input" accept="image/*" onchange="handleImage(this)">
-                    <img src="" style="display:none">
-                </div>
-                <div class="footer-num"></div>
-            </div>
-        `;
-        area.appendChild(container);
-        adjustScaling();
-        updatePageNumbers();
-        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function handleImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = input.nextElementSibling;
-                img.src = e.target.result;
-                img.style.display = 'block';
-                input.previousElementSibling.style.display = 'none';
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    function updatePageNumbers() {
-        const footers = document.querySelectorAll('.footer-num');
-        footers.forEach((f, i) => { f.innerText = i + 1; });
-    }
-
-    async function generateFinalPDF() {
-        const { jsPDF } = window.jspdf;
-        // تفعيل وضع التصدير قبل البدء
-        document.body.classList.add('exporting');
-        
-        const pages = document.querySelectorAll('.a4-sheet');
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-        for (let i = 0; i < pages.length; i++) {
-            const canvas = await html2canvas(pages[i], {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: "#ffffff",
-                logging: false
-            });
+<div id="dashboardPage">
+    <aside class="sidebar">
+        <div class="profile-area">
+            <img src="https://cdn-icons-png.flaticon.com/512/3413/3413535.png" class="student-vector">
             
-            const imgData = canvas.toDataURL('image/jpeg', 0.98);
-            if (i > 0) pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
-        }
+            <div class="student-tags">
+                <span class="tag" id="tagStage">المرحلة</span>
+                <span class="tag" id="tagGrade">الصف</span>
+            </div>
+            
+            <div class="stars" id="studentStars"></div>
 
-        document.body.classList.remove('exporting');
-        pdf.save('ملف_إنجاز_نظيف.pdf');
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="profile-img">
+            <div class="profile-name" id="studentName">اسم الطالب</div>
+            <div style="font-size:11px; color:#94a3b8; font-weight:bold; margin-top:4px;">طالب نشط</div>
+        </div>
+        
+        <nav class="side-nav">
+            <div class="nav-link active" data-tab="lessons" onclick="switchTab('lessons')"><i class="fas fa-book-open"></i> دروسي</div>
+            <div class="nav-link" data-tab="homework" onclick="switchTab('homework')"><i class="fas fa-pencil-alt"></i> واجباتي</div>
+            <div class="nav-link" data-tab="exams" onclick="switchTab('exams')"><i class="fas fa-graduation-cap"></i> اختباراتي</div>
+            <div class="nav-link" data-tab="msgs" onclick="switchTab('msgs')"><i class="fas fa-envelope"></i> الرسائل</div>
+        </nav>
+
+        <div class="logout-link" onclick="handleLogout()">
+            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="welcome-card">
+            <h2 style="margin:0">مرحباً بك، <span id="firstName">بطلنا</span> 👋</h2>
+            <p style="margin:5px 0 0; opacity:0.9; font-weight:600;">نتمنى لك رحلة تعليمية ممتعة اليوم.</p>
+        </div>
+        
+        <div id="contentArea">
+            <h3 id="currentTabTitle" style="font-weight:900; margin-bottom:20px;">دروسي</h3>
+            <div style="background:white; padding:60px; border-radius:25px; text-align:center; border: 2px dashed #e2e8f0; color:#94a3b8;">
+                <i class="fas fa-folder-open" style="font-size:40px; margin-bottom:15px; opacity:0.5;"></i>
+                <p style="font-weight:700;">لا يوجد محتوى متاح حالياً في هذا القسم</p>
+            </div>
+        </div>
+    </main>
+
+    <nav class="bottom-bar">
+        <div class="b-nav-item active" data-tab="lessons" onclick="switchTab('lessons')"><i class="fas fa-book-open"></i> دروسي</div>
+        <div class="b-nav-item" data-tab="homework" onclick="switchTab('homework')"><i class="fas fa-pencil-alt"></i> واجباتي</div>
+        <div class="b-nav-item" data-tab="exams" onclick="switchTab('exams')"><i class="fas fa-graduation-cap"></i> اختباراتي</div>
+        <div class="b-nav-item" data-tab="msgs" onclick="switchTab('msgs')"><i class="fas fa-envelope"></i> الرسائل</div>
+    </nav>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCr4T8GLRxtf_6LNrokjKvmBOwSkuGO5yQ",
+        authDomain: "hamsa-6009e.firebaseapp.com",
+        databaseURL: "https://hamsa-6009e-default-rtdb.firebaseio.com",
+        projectId: "hamsa-6009e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.handleLogin = async () => {
+        const u = document.getElementById('username').value.trim();
+        const p = document.getElementById('password').value.trim();
+        
+        if(!u || !p) return alert("يرجى إدخال اسم المستخدم وكلمة المرور");
+
+        try {
+            const snapshot = await get(child(ref(db), 'students'));
+            if(snapshot.exists()) {
+                const students = snapshot.val();
+                let user = Object.values(students).find(s => s.username === u && s.password === p);
+                
+                if(user) {
+                    if(user.sub === "نشط") {
+                        localStorage.setItem('eliteStudent', JSON.stringify(user));
+                        showDashboard(user);
+                    } else alert("⚠️ عذراً، حسابك غير نشط حالياً");
+                } else alert("❌ بيانات الدخول غير صحيحة");
+            }
+        } catch (e) { alert("حدث خطأ في الاتصال بقاعدة البيانات"); }
+    };
+
+    function showDashboard(user) {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('dashboardPage').style.display = 'flex';
+        
+        // تعبئة بيانات الجانبية
+        document.getElementById('studentName').innerText = user.name;
+        document.getElementById('firstName').innerText = user.name.split(' ')[0];
+        document.getElementById('tagStage').innerText = user.stage || '---';
+        document.getElementById('tagGrade').innerText = user.grade || '---';
+        
+        // عرض التقييم بالنجوم
+        const starsCount = parseInt(user.rate) || 5;
+        document.getElementById('studentStars').innerHTML = '<i class="fas fa-star"></i>'.repeat(starsCount);
     }
 
-    adjustScaling();
-    updatePageNumbers();
-</script>
+    window.switchTab = (tab) => {
+        const titles = { lessons:'دروسي', homework:'واجباتي', exams:'اختباراتي', msgs:'الرسائل' };
+        document.getElementById('currentTabTitle').innerText = titles[tab];
+        
+        document.querySelectorAll('.nav-link, .b-nav-item').forEach(el => {
+            if(el.getAttribute('data-tab') === tab) el.classList.add('active');
+            else el.classList.remove('active');
+        });
+    };
 
+    window.handleLogout = () => {
+        localStorage.clear();
+        location.reload();
+    };
+
+    window.onload = () => {
+        const savedUser = localStorage.getItem('eliteStudent');
+        if(savedUser) showDashboard(JSON.parse(savedUser));
+    };
+</script>
 </body>
 </html>
