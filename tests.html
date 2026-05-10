@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الاحترافية | Hamsa Elite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Tajawal', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; line-height: 1.6; }
+        .container { max-width: 1000px; margin: auto; }
+        
+        .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .header-card { border-top: 8px solid var(--primary); }
+        .input-title { width: 100%; border: none; border-bottom: 2px solid #e2e8f0; font-size: 24px; font-weight: 900; padding: 10px 0; outline: none; margin-bottom: 15px; }
+        .input-grade { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 10px; font-weight: bold; }
+
+        .question-box { background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; border-right: 6px solid var(--primary); position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .q-text { width: 100%; padding: 12px; border: 1px solid #f1f5f9; background: #f8fafc; border-radius: 10px; font-weight: bold; margin-bottom: 15px; }
+        .option-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .opt-input { flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        
+        .btn { padding: 12px 20px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-add { background: #eef2ff; color: var(--primary); margin-bottom: 20px; border: 2px dashed var(--primary); width: 100%; justify-content: center; }
+        .btn-save { background: var(--primary); color: white; width: 100%; justify-content: center; font-size: 18px; margin-bottom: 40px; }
+        .btn-delete { color: var(--danger); background: #fee2e2; padding: 8px; border-radius: 8px; position: absolute; left: 15px; top: 15px; }
+
+        .grid-exams { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .exam-item { background: white; padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.3s; }
+        .exam-item:hover { transform: translateY(-5px); border-color: var(--primary); }
+        
+        #analysisPanel { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; overflow-y: auto; padding: 20px; }
+        .panel-content { background: white; max-width: 900px; margin: auto; border-radius: 25px; padding: 30px; position: relative; }
+        
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-box { background: #f8fafc; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #e2e8f0; }
+        .stat-val { display: block; font-size: 24px; font-weight: 900; color: var(--primary); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; color: #64748b; }
+
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 30px; border-radius: 50px; z-index: 3000; display: none; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="container">
+    <div class="card header-card">
+        <h2 style="margin:0 0 20px 0;"><i class="fas fa-plus-circle"></i> إنشاء اختبار جديد</h2>
+        <input type="text" id="examTitle" class="input-title" placeholder="عنوان الاختبار (مثلاً: لغة عربية)">
+        <input type="text" id="targetGrade" class="input-grade" placeholder="الصف (مثلاً: الصف الأول)">
+    </div>
+
+    <div id="questionsContainer"></div>
+    <button class="btn btn-add" onclick="addQuestion()"><i class="fas fa-plus"></i> إضافة سؤال</button>
+    <button class="btn btn-save" id="saveBtn" onclick="saveExam()"><i class="fas fa-cloud-upload-alt"></i> نشر الاختبار</button>
+
+    <h2 style="font-weight:900;"><i class="fas fa-chart-line"></i> سجل النتائج والتحليلات</h2>
+    <div class="grid-exams" id="publishedExams"></div>
+</div>
+
+<div id="analysisPanel">
+    <div class="panel-content">
+        <button onclick="closePanel()" style="position:absolute; left:20px; top:20px; border:none; background:none; font-size:24px; cursor:pointer;">&times;</button>
+        <h2 id="anaTitle" style="font-weight:900; color:var(--primary); margin-bottom:5px;"></h2>
+        <p id="anaSubTitle" style="color:#64748b; margin-bottom:20px;"></p>
+        
+        <div id="anaLoader" class="loader"></div>
+
+        <div id="analysisBody" style="display:none;">
+            <div class="stat-grid">
+                <div class="stat-box"><span class="stat-val" id="stCount">0</span> المختبرين</div>
+                <div class="stat-box"><span class="stat-val" id="stAvg">0</span> متوسط الدرجات</div>
+                <div class="stat-box"><span class="stat-val" id="stTop">0</span> أعلى درجة</div>
+            </div>
+
+            <canvas id="myChart" style="max-height:280px; margin-bottom:20px;"></canvas>
+
+            <button class="btn" onclick="exportToExcel()" style="background:var(--success); color:white; font-size:13px; margin-bottom:15px;"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم الطالب</th>
+                        <th>الصف</th>
+                        <th>الدرجة</th>
+                        <th>النسبة</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getDatabase, ref, push, set, get, child } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCr4T8GLRxtf_6LNrokjKvmBOwSkuGO5yQ",
+        authDomain: "hamsa-6009e.firebaseapp.com",
+        databaseURL: "https://hamsa-6009e-default-rtdb.firebaseio.com",
+        projectId: "hamsa-6009e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    let currentResults = [];
+    let myChartInstance = null;
+
+    window.showToast = (msg) => {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 3000);
+    };
+
+    window.addQuestion = () => {
+        const id = Date.now();
+        const html = `
+            <div class="question-box" id="q_${id}">
+                <button class="btn btn-delete" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
+                <input type="text" class="q-text" placeholder="اكتب السؤال...">
+                <div id="opts_${id}">
+                    <div class="option-row"><input type="radio" name="r_${id}" checked><input type="text" class="opt-input" placeholder="خيار 1"></div>
+                    <div class="option-row"><input type="radio" name="r_${id}"><input type="text" class="opt-input" placeholder="خيار 2"></div>
+                </div>
+                <button onclick="addOpt(${id})" style="color:var(--primary); background:none; border:none; cursor:pointer; font-size:12px; font-weight:bold;">+ إضافة خيار</button>
+            </div>`;
+        document.getElementById('questionsContainer').insertAdjacentHTML('beforeend', html);
+    };
+
+    window.addOpt = (id) => {
+        document.getElementById(`opts_${id}`).insertAdjacentHTML('beforeend', `<div class="option-row"><input type="radio" name="r_${id}"><input type="text" class="opt-input" placeholder="خيار جديد"><button onclick="this.parentElement.remove()" style="border:none; background:none; color:red; cursor:pointer;">&times;</button></div>`);
+    };
+
+    window.saveExam = async () => {
+        const title = document.getElementById('examTitle').value.trim();
+        const grade = document.getElementById('targetGrade').value.trim(); // حذف الفراغات تلقائياً
+        const boxes = document.querySelectorAll('.question-box');
+        
+        if(!title || !grade || boxes.length === 0) return alert("يرجى ملء كافة الحقول");
+
+        document.getElementById('saveBtn').disabled = true;
+        document.getElementById('saveBtn').innerText = "جاري النشر...";
+
+        const questions = Array.from(boxes).map(box => {
+            const opts = Array.from(box.querySelectorAll('.opt-input')).map(i => i.value.trim());
+            const correct = Array.from(box.querySelectorAll('input[type="radio"]')).findIndex(r => r.checked);
+            return { text: box.querySelector('.q-text').value.trim(), options: opts, correct };
+        });
+
+        try {
+            await set(push(ref(db, 'exams')), { title, grade, questions, time: Date.now() });
+            showToast("✅ تم نشر الاختبار بنجاح");
+            
+            // تفريغ الخانات بعد النجاح
+            document.getElementById('examTitle').value = "";
+            document.getElementById('targetGrade').value = "";
+            document.getElementById('questionsContainer').innerHTML = "";
+            addQuestion();
+            loadExams();
+        } catch (e) {
+            alert("خطأ في الاتصال");
+        } finally {
+            document.getElementById('saveBtn').disabled = false;
+            document.getElementById('saveBtn').innerHTML = '<i class="fas fa-cloud-upload-alt"></i> نشر الاختبار';
+        }
+    };
+
+    window.loadExams = async () => {
+        const snap = await get(child(ref(db), 'exams'));
+        const exams = snap.val() || {};
+        let html = '';
+        Object.keys(exams).sort((a,b) => exams[b].time - exams[a].time).forEach(id => {
+            html += `<div class="exam-item" onclick="viewAnalysis('${id}', '${exams[id].title}', '${exams[id].grade}')">
+                        <b style="color:var(--primary);">${exams[id].title}</b><br>
+                        <small>الصف: ${exams[id].grade}</small>
+                    </div>`;
+        });
+        document.getElementById('publishedExams').innerHTML = html || "لا توجد اختبارات منشورة بعد";
+    };
+
+    window.viewAnalysis = async (examId, title, grade) => {
+        document.getElementById('anaTitle').innerText = title;
+        document.getElementById('anaSubTitle').innerText = "تحليل نتائج: " + grade;
+        document.getElementById('analysisPanel').style.display = 'block';
+        document.getElementById('anaLoader').style.display = 'block';
+        document.getElementById('analysisBody').style.display = 'none';
+        
+        try {
+            const [resSnap, stuSnap] = await Promise.all([
+                get(child(ref(db), 'results')),
+                get(child(ref(db), 'students'))
+            ]);
+            
+            const resultsData = resSnap.val() || {};
+            const studentsData = stuSnap.val() || {};
+            currentResults = [];
+
+            Object.keys(resultsData).forEach(userKey => {
+                if(resultsData[userKey][examId]) {
+                    const result = resultsData[userKey][examId];
+                    // البحث في الطلاب عن طريق username
+                    const student = Object.values(studentsData).find(s => s.username === userKey) || { name: userKey, grade: "غير معروف" };
+                    
+                    currentResults.push({
+                        name: student.name,
+                        grade: student.grade,
+                        score: result.score,
+                        total: result.total
+                    });
+                }
+            });
+
+            renderAnalysis();
+            document.getElementById('anaLoader').style.display = 'none';
+            document.getElementById('analysisBody').style.display = 'block';
+        } catch (e) {
+            alert("حدث خطأ في جلب التحليل");
+        }
+    };
+
+    function renderAnalysis() {
+        const table = document.getElementById('resultsTable');
+        // ترتيب النتائج تنازلياً حسب الدرجة تلقائياً
+        currentResults.sort((a,b) => b.score - a.score);
+        
+        table.innerHTML = currentResults.map(r => `
+            <tr>
+                <td><b>${r.name}</b></td>
+                <td>${r.grade}</td>
+                <td>${r.score} / ${r.total}</td>
+                <td><b style="color:var(--primary);">${Math.round(r.score/r.total*100)}%</b></td>
+            </tr>
+        `).join('');
+        
+        const scores = currentResults.map(r => r.score);
+        document.getElementById('stCount').innerText = currentResults.length;
+        document.getElementById('stAvg').innerText = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : 0;
+        document.getElementById('stTop').innerText = scores.length ? Math.max(...scores) : 0;
+
+        if(myChartInstance) myChartInstance.destroy();
+        const ctx = document.getElementById('myChart').getContext('2d');
+        myChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: currentResults.map(r => r.name),
+                datasets: [{ label: 'الدرجة', data: scores, backgroundColor: '#4f46e5', borderRadius: 5 }]
+            }
+        });
+    }
+
+    window.exportToExcel = () => {
+        const data = currentResults.map(r => ({ "اسم الطالب": r.name, "الصف": r.grade, "الدرجة": r.score, "المجموع": r.total }));
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "النتائج");
+        XLSX.writeFile(wb, `تحليل_${document.getElementById('anaTitle').innerText}.xlsx`);
+    };
+
+    window.closePanel = () => document.getElementById('analysisPanel').style.display = 'none';
+    
+    addQuestion();
+    loadExams();
+</script>
+</body>
+</html>
