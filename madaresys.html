@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Hamsa Elite | Smart Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --radius-lg: 24px;
+        }
+
+        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: var(--bg); margin: 0; padding: 15px; color: var(--dark); }
+        .container { max-width: 1200px; margin: auto; }
+
+        /* --- Toast --- */
+        #toast-box { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; }
+        .toast-msg { background: rgba(15, 23, 42, 0.95); color: white; padding: 12px 30px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideUp 0.4s ease; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* --- Header --- */
+        .admin-header { background: var(--surface); padding: 25px; border-radius: var(--radius-lg); box-shadow: 0 4px 20px -5px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid var(--border); }
+        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; }
+        .brand-title { font-size: 24px; font-weight: 900; margin: 0; }
+        .brand-title span { color: var(--primary); }
+
+        .input-style { width: 100%; padding: 12px 15px; border-radius: 12px; border: 2px solid var(--border); outline: none; transition: 0.3s; background: #f1f5f9; font-weight: 600; appearance: none; }
+        .input-style:focus { border-color: var(--primary); background: #fff; }
+
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 15px; }
+
+        /* --- Cards --- */
+        .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .st-card { background: var(--surface); border-radius: var(--radius-lg); padding: 25px; border: 1px solid var(--border); position: relative; transition: 0.3s; }
+        .status-badge { position: absolute; top: 0; left: 0; padding: 6px 15px; border-bottom-right-radius: 15px; font-size: 11px; font-weight: 800; }
+        .bg-active { background: #dcfce7; color: #166534; }
+        .bg-blocked { background: #fee2e2; color: #991b1b; }
+        .bg-inactive { background: #f1f5f9; color: #475569; }
+        .card-stars { color: var(--warning); margin-bottom: 5px; }
+
+        /* --- Buttons --- */
+        .btn { border: none; border-radius: 12px; padding: 12px; cursor: pointer; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-small { padding: 8px 12px; font-size: 11px; border-radius: 10px; background: var(--dark); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        /* --- Modals --- */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; backdrop-filter: blur(4px); }
+        .modal-content { background: white; width: 100%; max-width: 550px; border-radius: var(--radius-lg); overflow: hidden; border: 2px solid var(--border); }
+        .modal-body { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-height: 75vh; overflow-y: auto; }
+        .field-full { grid-column: span 2; }
+        .field-label { font-size: 12px; font-weight: 800; color: #64748b; margin-bottom: 5px; display: block; }
+        
+        .stars-container { display: flex; gap: 5px; color: #cbd5e1; font-size: 24px; cursor: pointer; justify-content: center; padding: 10px; background: #f8fafc; border-radius: 12px; }
+        .star.active { color: var(--warning); }
+        .confirm-box { max-width: 400px; text-align: center; padding: 30px; border-radius: var(--radius-lg); background: white; border: 2px solid var(--border); }
+
+        select.input-style { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 10px center; background-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div id="toast-box"></div>
+
+<div class="container">
+    <div class="admin-header">
+        <div class="top-row">
+            <h1 class="brand-title">HAMSA <span>ELITE</span></h1>
+            <button class="btn btn-add" onclick="openAddModal()">+ إضافة طالب جديد</button>
+        </div>
+        <input type="text" class="input-style" id="searchIn" placeholder="بحث باسم الطالب أو الكود..." oninput="filterData()">
+        <div class="filter-grid">
+            <select class="input-style" id="fLevel" onchange="updateFilterGrades(); filterData()"><option value="">كل المراحل</option><option value="ابتدائي">ابتدائي</option><option value="اعدادي">اعدادي</option><option value="ثانوي">ثانوي</option></select>
+            <select class="input-style" id="fGrade" onchange="filterData()"><option value="">كل الصفوف</option></select>
+            <select class="input-style" id="fRate" onchange="filterData()">
+                <option value="">كل التقييمات</option>
+                <option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option><option value="2">⭐⭐</option><option value="1">⭐</option>
+            </select>
+        </div>
+    </div>
+    <div class="student-grid" id="grid"></div>
+</div>
+
+<!-- Main Modal -->
+<div class="modal" id="studentModal">
+    <div class="modal-content">
+        <div style="padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <h2 id="modalTitle" style="margin:0; font-size:18px;">بيانات الطالب</h2>
+            <button onclick="closeModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--danger)">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editKey">
+            <input type="hidden" id="inRateValue" value="5">
+            <div class="field-full"><span class="field-label">التقييم العام</span><div class="stars-container" id="starInput"><span class="star active" data-v="1">★</span><span class="star active" data-v="2">★</span><span class="star active" data-v="3">★</span><span class="star active" data-v="4">★</span><span class="star active" data-v="5">★</span></div></div>
+            <div class="field-full"><span class="field-label">الاسم بالكامل</span><input type="text" id="inName" class="input-style"></div>
+            <div><span class="field-label">اسم المستخدم</span><div style="display:flex; gap:5px;"><input type="text" id="inUser" class="input-style" style="font-size:12px;"><button class="btn btn-small" onclick="regenerateUser()">توليد</button></div></div>
+            <div><span class="field-label">كلمة المرور</span><div style="display:flex; gap:5px;"><input type="text" id="inPass" class="input-style" style="font-size:12px;"><button class="btn btn-small btn-small" style="background:#10b981" onclick="generateStrongPass()">أمان</button></div></div>
+            <div><span class="field-label">كود الطالب</span><input type="text" id="inCode" class="input-style" readonly style="background:#e2e8f0; cursor:not-allowed;"></div>
+            <div><span class="field-label">رقم الواتساب</span><input type="text" id="inPhone" class="input-style"></div>
+            <div><span class="field-label">المرحلة</span><select id="inLevel" class="input-style" onchange="updateModalGrades()"><option value="ابتدائي">ابتدائي</option><option value="اعدادي">اعدادي</option><option value="ثانوي">ثانوي</option></select></div>
+            <div><span class="field-label">الصف</span><select id="inGrade" class="input-style"></select></div>
+            <div><span class="field-label">رقم الفصل</span><input type="text" id="inClass" class="input-style"></div>
+            <div><span class="field-label">حالة الحساب</span>
+                <select id="inSub" class="input-style">
+                    <option value="نشط">نشط</option>
+                    <option value="غير نشط">غير نشط</option>
+                    <option value="محظور">محظور</option>
+                </select>
+            </div>
+        </div>
+        <div style="padding:20px; background:#f8fafc; display:flex; gap:10px; border-top:1px solid var(--border)">
+            <button class="btn btn-add" style="flex:2;" onclick="saveStudent()">حفظ البيانات</button>
+            <button class="btn" style="flex:1; background:#e2e8f0;" onclick="closeModal()">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal" id="confirmModal">
+    <div class="confirm-box">
+        <div style="font-size: 50px; margin-bottom:10px;">⚠️</div>
+        <h3>تأكيد الحذف</h3>
+        <p style="color:#64748b; margin-bottom:20px;">هل أنت متأكد من حذف هذا الطالب نهائياً؟</p>
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-danger" style="flex:1;" id="confirmDeleteBtn">نعم، احذف</button>
+            <button class="btn" style="flex:1; background:#e2e8f0;" onclick="closeConfirm()">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCr4T8GLRxtf_6LNrokjKvmBOwSkuGO5yQ",
+        authDomain: "hamsa-6009e.firebaseapp.com",
+        databaseURL: "https://hamsa-6009e-default-rtdb.firebaseio.com",
+        projectId: "hamsa-6009e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    let students = [];
+    let deleteId = null;
+
+    const gradesData = { 
+        "ابتدائي": ["الأول الابتدائي", "الثاني الابتدائي", "الثالث الابتدائي", "الرابع الابتدائي", "الخامس الابتدائي", "السادس الابتدائي"], 
+        "اعدادي": ["الأول الإعدادي", "الثاني الإعدادي", "الثالث الإعدادي"], 
+        "ثانوي": ["الأول الثانوي", "الثاني الثانوي", "الثالث الثانوي"] 
+    };
+
+    function showToast(msg) {
+        const box = document.getElementById('toast-box');
+        box.innerHTML = `<div class="toast-msg">${msg}</div>`;
+        setTimeout(() => box.innerHTML = "", 3000);
+    }
+
+    window.generateStrongPass = (silent=false) => {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$%&*";
+        let p = ""; for(let i=0; i<10; i++) p += chars.charAt(Math.floor(Math.random()*chars.length));
+        document.getElementById('inPass').value = p;
+        if(!silent) showToast("🔑 تم توليد كلمة مرور قوية");
+    };
+
+    window.regenerateUser = (silent=false) => {
+        document.getElementById('inUser').value = "U" + Math.floor(1000000 + Math.random() * 9000000);
+        if(!silent) showToast("👤 تم توليد اسم مستخدم");
+    };
+
+    onValue(ref(db, 'students'), (snap) => {
+        const data = snap.val();
+        students = [];
+        if(data) Object.keys(data).forEach(k => students.push({id: k, ...data[k]}));
+        filterData();
+    });
+
+    window.openAddModal = () => {
+        document.getElementById('editKey').value = "";
+        document.querySelectorAll('#studentModal input').forEach(i => i.value = "");
+        regenerateUser(true); generateStrongPass(true);
+        const maxCode = students.reduce((max, s) => Math.max(max, parseInt(s.code.replace('#','')) || 0), 0);
+        document.getElementById('inCode').value = `#${maxCode + 1}`;
+        document.getElementById('inSub').value = "نشط";
+        updateModalGrades();
+        document.getElementById('modalTitle').innerText = "إضافة طالب جديد";
+        document.getElementById('studentModal').style.display = 'flex';
+    };
+
+    window.editStudent = (id) => {
+        const s = students.find(x => x.id === id);
+        document.getElementById('editKey').value = id;
+        document.getElementById('inName').value = s.name;
+        document.getElementById('inUser').value = s.username;
+        document.getElementById('inPass').value = s.password;
+        document.getElementById('inCode').value = s.code;
+        document.getElementById('inPhone').value = s.phone;
+        document.getElementById('inLevel').value = s.level;
+        updateModalGrades(s.grade);
+        document.getElementById('inSub').value = s.sub || "نشط";
+        document.getElementById('inRateValue').value = s.rating || 5;
+        document.querySelectorAll('.star').forEach(st => st.classList.toggle('active', st.getAttribute('data-v') <= (s.rating || 5)));
+        document.getElementById('modalTitle').innerText = "تعديل البيانات";
+        document.getElementById('studentModal').style.display = 'flex';
+    };
+
+    window.saveStudent = async () => {
+        const key = document.getElementById('editKey').value;
+        const subStatus = document.getElementById('inSub').value;
+        const obj = {
+            name: document.getElementById('inName').value,
+            username: document.getElementById('inUser').value,
+            password: document.getElementById('inPass').value,
+            code: document.getElementById('inCode').value,
+            phone: document.getElementById('inPhone').value,
+            level: document.getElementById('inLevel').value,
+            grade: document.getElementById('inGrade').value,
+            class: document.getElementById('inClass').value,
+            sub: subStatus,
+            rating: document.getElementById('inRateValue').value,
+            // منطق الحظر: إذا كانت الحالة "محظور" أو "غير نشط" يمنع الدخول
+            canLogin: (subStatus === "نشط") 
+        };
+        if(!obj.name) return showToast("⚠️ يرجى إدخال الاسم");
+        key ? await update(ref(db, 'students/'+key), obj) : await push(ref(db, 'students'), obj);
+        closeModal();
+        showToast("✅ تم حفظ البيانات بنجاح");
+    };
+
+    window.filterData = () => {
+        const search = document.getElementById('searchIn').value.toLowerCase();
+        const lvl = document.getElementById('fLevel').value;
+        const rat = document.getElementById('fRate').value;
+        const res = students.filter(s => (s.name.toLowerCase().includes(search) || s.code.includes(search)) && (!lvl || s.level === lvl) && (!rat || s.rating == rat));
+        render(res);
+    };
+
+    function render(data) {
+        document.getElementById('grid').innerHTML = data.map(s => {
+            let cls = 'bg-active';
+            if(s.sub === 'محظور') cls = 'bg-blocked';
+            if(s.sub === 'غير نشط') cls = 'bg-inactive';
+            
+            return `
+            <div class="st-card">
+                <span class="status-badge ${cls}">${s.sub || 'نشط'}</span>
+                <div class="card-stars">${"★".repeat(s.rating || 5)}${"☆".repeat(5-(s.rating||5))}</div>
+                <h3 style="margin:10px 0 5px 0;">${s.name}</h3>
+                <div style="font-size:12px; color:#64748b; margin-bottom:15px;"><b>${s.code}</b> | ${s.grade}</div>
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <button class="btn" style="flex:1; background:#f1f5f9;" onclick="editStudent('${s.id}')">تعديل</button>
+                    <button class="btn" style="flex:1; background:#fff1f2; color:var(--danger);" onclick="askDelete('${s.id}')">حذف</button>
+                </div>
+                <a href="https://wa.me/${s.phone}" target="_blank" class="btn" style="background:#22c55e; color:white; text-decoration:none;">واتساب</a>
+            </div>`;
+        }).join('');
+    }
+
+    window.updateFilterGrades = () => {
+        const lvl = document.getElementById('fLevel').value;
+        const sel = document.getElementById('fGrade');
+        sel.innerHTML = '<option value="">كل الصفوف</option>';
+        if(lvl) gradesData[lvl].forEach(g => sel.innerHTML += `<option value="${g}">${g}</option>`);
+    };
+
+    window.updateModalGrades = (sel = null) => {
+        const lvl = document.getElementById('inLevel').value;
+        document.getElementById('inGrade').innerHTML = gradesData[lvl].map(g => `<option value="${g}" ${g===sel?'selected':''}>${g}</option>`).join('');
+    };
+
+    window.askDelete = (id) => { deleteId = id; document.getElementById('confirmModal').style.display = 'flex'; };
+    window.closeConfirm = () => { document.getElementById('confirmModal').style.display = 'none'; };
+    document.getElementById('confirmDeleteBtn').onclick = async () => {
+        if(deleteId) { await remove(ref(db, 'students/'+deleteId)); closeConfirm(); showToast("🗑️ تم حذف بيانات الطالب"); }
+    };
+
+    window.closeModal = () => document.getElementById('studentModal').style.display = 'none';
+    document.querySelectorAll('.star').forEach(s => {
+        s.onclick = function() {
+            const v = this.getAttribute('data-v');
+            document.getElementById('inRateValue').value = v;
+            document.querySelectorAll('.star').forEach(st => st.classList.toggle('active', st.getAttribute('data-v') <= v));
+        };
+    });
+</script>
+</body>
+</html>
