@@ -21,12 +21,21 @@
         .hidden { display: none !important; }
 
         /* --- شاشة الدخول --- */
-        #loginPage { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; position: fixed; width: 100%; z-index: 9999; }
-        .login-card { width: 90%; max-width: 400px; text-align: center; padding: 40px 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); }
-        .input-field { width: 100%; padding: 16px; margin: 10px 0; border-radius: 15px; border: 2px solid #f1f5f9; outline: none; text-align: right; font-size: 16px; background: #f8fafc; }
+        #loginPage { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; position: fixed; width: 100%; z-index: 9999; overflow-y: auto; padding: 20px 0; }
+        .login-card { width: 90%; max-width: 400px; text-align: center; padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); background: #fff; }
+        .input-field, .select-field { width: 100%; padding: 16px; margin: 10px 0; border-radius: 15px; border: 2px solid #f1f5f9; outline: none; text-align: right; font-size: 16px; background: #f8fafc; appearance: none; }
+        
+        .join-link { color: var(--primary); font-weight: 800; cursor: pointer; text-decoration: underline; display: inline-block; margin-top: 15px; }
+        .guest-btn { color: #64748b; font-weight: 700; cursor: pointer; margin-top: 15px; display: block; font-size: 14px; }
+        .support-btn { background: #25d366; color: white; padding: 12px 25px; border-radius: 50px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 800; margin-top: 25px; font-size: 14px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); }
+
+        /* --- نافذة الانضمام (Modal) --- */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; padding: 25px; border-radius: 25px; width: 100%; max-width: 450px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close-modal { position: absolute; top: 15px; left: 15px; font-size: 20px; cursor: pointer; color: #94a3b8; }
 
         /* --- الرسائل التنبيهية --- */
-        #customAlert { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: white; padding: 15px 25px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); z-index: 10000; display: flex; align-items: center; gap: 12px; font-weight: 800; border: 2px solid var(--primary); transition: 0.5s; }
+        #customAlert { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: white; padding: 15px 25px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); z-index: 10002; display: flex; align-items: center; gap: 12px; font-weight: 800; border: 2px solid var(--primary); transition: 0.5s; width: max-content; max-width: 90%; }
         #customAlert.show { top: 20px; }
 
         /* --- القائمة الجانبية --- */
@@ -40,29 +49,11 @@
         .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; color: #64748b; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
         .nav-link.active { background: var(--primary); color: white; }
 
-        /* --- المحتوى الرئيسي --- */
         .main-content { margin-right: 0; padding: 20px; min-height: 100vh; transition: 0.4s; padding-bottom: 100px; }
         @media (min-width: 993px) { .main-content { margin-right: var(--sidebar-width); } .sidebar { right: 0; } .menu-btn { display: none; } }
         
-        /* بطاقة الترحيب */
         .welcome-card-new { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; padding: 25px; border-radius: 25px; margin-top: 50px; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2); }
         .welcome-card-new h2 { margin: 0; font-weight: 900; font-size: 22px; }
-        .welcome-card-new p { margin: 8px 0 0 0; opacity: 0.9; font-weight: 500; font-size: 14px; }
-
-        /* --- شبكة الاختبارات --- */
-        .exams-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .exam-card { background: white; padding: 15px; border-radius: 18px; border: 1px solid #f1f5f9; text-align: center; }
-        .btn-start-small { background: var(--primary-light); color: var(--primary); border: none; width: 100%; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 14px; margin-top: 10px; }
-
-        /* --- سجل الدرجات --- */
-        .history-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; }
-        .score-badge { background: var(--primary-light); color: var(--primary); padding: 5px 12px; border-radius: 10px; font-weight: 900; }
-
-        /* --- واجهة الاختبار --- */
-        .exam-header { background: white; padding: 15px; border-radius: 15px; border: 1px solid #e2e8f0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; margin-bottom: 20px; }
-        .timer-badge { background: var(--danger); color: white; padding: 8px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: 900; grid-column: span 2; }
-        .option-item { background: #f8fafc; border: 2px solid #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; font-weight: 700; text-align: right; }
-        .option-item.selected { border-color: var(--primary); background: var(--primary-light); }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: none; justify-content: space-around; padding: 10px; border-top: 1px solid #f1f5f9; z-index: 1000; border-radius: 20px 20px 0 0; }
         .b-nav-item { text-align: center; color: #94a3b8; font-size: 10px; font-weight: 800; cursor: pointer; flex: 1; }
@@ -84,10 +75,43 @@
 
 <div id="loginPage">
     <div class="login-card">
-        <h1 style="color:var(--primary); font-weight:900;">HAMSA ELITE</h1>
+        <h1 style="color:var(--primary); font-weight:900; margin-bottom:5px;">HAMSA ELITE</h1>
+        <p style="color:#64748b; font-weight:600; margin-bottom:20px;">بوابة النخبة التعليمية</p>
+        
         <input type="text" id="username" class="input-field" placeholder="اسم المستخدم">
         <input type="password" id="password" class="input-field" placeholder="كلمة المرور">
-        <button onclick="login()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:12px; font-weight:900; margin-top:10px; cursor:pointer;">دخول</button>
+        <button onclick="login()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:12px; font-weight:900; margin-top:10px; cursor:pointer;">دخول للمنصة</button>
+        
+        <div class="join-link" onclick="toggleModal(true)">انضم إلينا الآن</div>
+        <div class="guest-btn" onclick="guestLogin()">الدخول كـ زائر</div>
+        
+        <a href="https://wa.me/966534553706" class="support-btn" target="_blank">
+            <i class="fab fa-whatsapp"></i> الدعم الفني
+        </a>
+    </div>
+</div>
+
+<div class="modal" id="joinModal">
+    <div class="modal-content">
+        <i class="fas fa-times close-modal" onclick="toggleModal(false)"></i>
+        <h3 style="color:var(--primary); font-weight:900; margin-top:0;">تسجيل طالب جديد</h3>
+        <p style="font-size:13px; color:#64748b; margin-bottom:15px;">يرجى اختيار المرحلة والصف بدقة</p>
+        
+        <input type="text" id="regName" class="input-field" placeholder="الاسم الرباعي">
+        <input type="number" id="regPhone" class="input-field" placeholder="رقم الواتساب">
+        
+        <select id="regStage" class="select-field" onchange="updateGrades()">
+            <option value="" disabled selected>اختر المرحلة</option>
+            <option value="ابتدائي">المرحلة الابتدائية</option>
+            <option value="متوسط">المرحلة المتوسطة</option>
+            <option value="ثانوي">المرحلة الثانوية</option>
+        </select>
+
+        <select id="regGrade" class="select-field">
+            <option value="" disabled selected>اختر الصف</option>
+        </select>
+        
+        <button onclick="submitNewStudent()" style="width:100%; padding:15px; background:var(--success); color:white; border:none; border-radius:12px; font-weight:900; margin-top:15px; cursor:pointer;">إرسال الطلب</button>
     </div>
 </div>
 
@@ -114,7 +138,6 @@
             <h2 id="welcomeText"></h2>
             <p>استعد ليوم مليء بالإنجاز، فالعلم هو طريقك نحو القمة! 🚀</p>
         </div>
-
         <h4 id="tabTitle" style="margin:20px 0; font-weight:900;">دروسي</h4>
         <div id="mainDisplay"></div>
     </main>
@@ -128,7 +151,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getDatabase, ref, get, child, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+    import { getDatabase, ref, get, child, set, push } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCr4T8GLRxtf_6LNrokjKvmBOwSkuGO5yQ",
@@ -140,18 +163,45 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    let currentExam = null;
-    let selectedAns = {};
-    let timerInt;
+    const gradeData = {
+        "ابتدائي": ["الأول الابتدائي", "الثاني الابتدائي", "الثالث الابتدائي", "الرابع الابتدائي", "الخامس الابتدائي", "السادس الابتدائي"],
+        "متوسط": ["الأول المتوسط", "الثاني المتوسط", "الثالث المتوسط"],
+        "ثانوي": ["الأول الثانوي", "الثاني الثانوي", "الثالث الثانوي"]
+    };
+
+    window.updateGrades = () => {
+        const stage = document.getElementById('regStage').value;
+        const gradeSelect = document.getElementById('regGrade');
+        gradeSelect.innerHTML = '<option value="" disabled selected>اختر الصف</option>';
+        if(gradeData[stage]) {
+            gradeData[stage].forEach(g => {
+                gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
+            });
+        }
+    };
 
     window.showAlert = (msg, type = 'success') => {
         const box = document.getElementById('customAlert');
-        const icon = document.getElementById('alertIcon');
         document.getElementById('alertText').innerText = msg;
         box.style.borderColor = type === 'success' ? 'var(--success)' : 'var(--danger)';
-        icon.innerHTML = type === 'success' ? '✅' : '⚠️';
+        document.getElementById('alertIcon').innerHTML = type === 'success' ? '✅' : '⚠️';
         box.classList.add('show');
-        setTimeout(() => box.classList.remove('show'), 3000);
+        setTimeout(() => box.classList.remove('show'), 4000);
+    };
+
+    window.toggleModal = (show) => { document.getElementById('joinModal').style.display = show ? 'flex' : 'none'; };
+
+    window.submitNewStudent = async () => {
+        const name = document.getElementById('regName').value;
+        const phone = document.getElementById('regPhone').value;
+        const stage = document.getElementById('regStage').value;
+        const grade = document.getElementById('regGrade').value;
+
+        if(!name || !phone || !stage || !grade) { showAlert("يرجى تعبئة كافة الخانات", "error"); return; }
+
+        await push(ref(db, 'join_requests'), { name, phone, stage, grade, date: Date.now() });
+        toggleModal(false);
+        showAlert("تم التسجيل وسوف يتم التواصل معكم عبر الواتس 😍", "success");
     };
 
     window.login = async () => {
@@ -159,11 +209,14 @@
         const p = document.getElementById('password').value.trim();
         const snap = await get(child(ref(db), 'students'));
         const user = Object.values(snap.val() || {}).find(s => s.username === u && s.password === p);
-        if(user) { 
-            localStorage.setItem('user', JSON.stringify(user)); 
-            startApp(user);
-            showAlert("تم تسجيل الدخول بنجاح");
-        } else showAlert("بيانات الدخول خاطئة!", "error");
+        if(user) { localStorage.setItem('user', JSON.stringify(user)); startApp(user); }
+        else showAlert("بيانات الدخول خاطئة!", "error");
+    };
+
+    window.guestLogin = () => {
+        const guestUser = { name: "زائر", grade: "غير محدد", isGuest: true };
+        startApp(guestUser);
+        showAlert("دخلت كزائر، سجل الآن لتستمتع بكامل المحتوى", "error");
     };
 
     function startApp(user) {
@@ -171,135 +224,43 @@
         document.getElementById('dashboardPage').classList.remove('hidden');
         document.getElementById('uNameSide').innerText = user.name;
         document.getElementById('uGradeSide').innerText = user.grade;
-        document.getElementById('welcomeText').innerText = `مرحباً بك مجدداً يا ${user.name} 👋 😍`;
+        document.getElementById('welcomeText').innerText = `مرحباً بك يا ${user.name} 👋 😍`;
         switchTab('lessons');
     }
 
     window.switchTab = async (tab) => {
+        const user = JSON.parse(localStorage.getItem('user')) || { isGuest: true };
         const display = document.getElementById('mainDisplay');
-        const user = JSON.parse(localStorage.getItem('user'));
         document.querySelectorAll('.nav-link, .b-nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById(`l-${tab}`)?.classList.add('active');
         document.getElementById(`b-${tab}`)?.classList.add('active');
         document.getElementById('tabTitle').innerText = tab === 'exams' ? "اختباراتي" : (tab === 'msgs' ? "الرسائل" : "دروسي");
 
-        if(tab === 'exams') {
-            display.innerHTML = '<button onclick="showHistory()" style="width:100%; padding:14px; border-radius:15px; border:none; background:var(--primary); color:white; font-weight:800; margin-bottom:20px; cursor:pointer; width:100%; box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);"><i class="fas fa-history"></i> عرض سجل درجاتي</button><div class="exams-grid" id="examList"></div>';
-            const examsSnap = await get(child(ref(db), 'exams'));
-            const resultsSnap = await get(child(ref(db), `results/${user.username}`));
-            const solvedExams = resultsSnap.exists() ? Object.keys(resultsSnap.val()) : [];
-            const allExams = examsSnap.val() || {};
-            let html = '';
-            Object.keys(allExams).forEach(id => {
-                if (allExams[id].grade === user.grade && !solvedExams.includes(id)) {
-                    html += `<div class="exam-card"><h4>${allExams[id].title}</h4><button class="btn-start-small" onclick="startQuiz('${id}')">ابدأ الآن</button></div>`;
-                }
-            });
-            document.getElementById('examList').innerHTML = html || '<p style="text-align:center; grid-column: span 2; color:#94a3b8; padding:20px;">لا توجد اختبارات جديدة حالياً</p>';
-        } 
-        else if(tab === 'msgs') {
+        if(user.isGuest) {
             display.innerHTML = `
-                <div style="text-align:center; padding:50px; color:#94a3b8;">
-                    <i class="fas fa-envelope-open-text" style="font-size:40px; margin-bottom:15px; color:#cbd5e1;"></i>
-                    <p style="font-weight:700; font-size:16px;">لا توجد رسائل حالياً</p>
+                <div style="text-align:center; padding:50px; color:#64748b;">
+                    <i class="fas fa-lock" style="font-size:40px; margin-bottom:15px; color:#cbd5e1;"></i>
+                    <p style="font-weight:700;">عذراً، يجب عليك التسجيل كطالب رسمي لمشاهدة المحتوى</p>
+                    <div onclick="logout()" style="color:var(--primary); font-weight:800; cursor:pointer; text-decoration:underline;">العودة لإنشاء حساب والاستمتاع بالتعلم</div>
                 </div>`;
+            return;
         }
-        else {
-            display.innerHTML = '<div style="text-align:center; padding:50px; color:#94a3b8;"><i class="fas fa-folder-open" style="font-size:40px; margin-bottom:10px;"></i><br>لا توجد بيانات حالياً</div>';
+
+        if(tab === 'msgs') {
+            display.innerHTML = '<div style="text-align:center; padding:50px; color:#94a3b8;"><i class="fas fa-envelope-open-text" style="font-size:40px; margin-bottom:15px;"></i><p style="font-weight:700;">لا توجد رسائل حالياً</p></div>';
+        } else if(tab === 'exams') {
+            display.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px;">لا توجد اختبارات متاحة حالياً</p>';
+        } else {
+            display.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px;">قريباً سيتم رفع الدروس التعليمية</p>';
         }
         toggleSidebar(false);
-        window.scrollTo(0,0);
-    };
-
-    window.startQuiz = async (id) => {
-        const snap = await get(child(ref(db), `exams/${id}`));
-        currentExam = { ...snap.val(), id: id };
-        selectedAns = {};
-        const startTime = localStorage.getItem(`t_${id}`) || Date.now();
-        localStorage.setItem(`t_${id}`, startTime);
-        renderQuiz(startTime);
-    };
-
-    function renderQuiz(startTime) {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const display = document.getElementById('mainDisplay');
-        display.innerHTML = `
-            <div class="exam-header">
-                <div class="timer-badge" id="timer">60:00</div>
-                <div><b>المدرسة:</b> ${currentExam.school || 'النخبة'}</div>
-                <div><b>الصف:</b> ${user.grade}</div>
-                <div><b>الطالب:</b> ${user.name}</div>
-            </div>
-            <div id="qArea"></div>
-            <div style="padding: 20px 0;">
-                <button class="btn-start-small" style="background:var(--success); color:white; padding:18px; font-size:16px;" onclick="submitExam()">حفظ وإرسال الإجابات</button>
-            </div>
-        `;
-        currentExam.questions.forEach((q, i) => {
-            let opts = q.options.map((o, oi) => `<div class="option-item" id="q${i}_o${oi}" onclick="pick(${i}, ${oi})">${o}</div>`).join('');
-            document.getElementById('qArea').innerHTML += `<div style="background:white; padding:15px; border-radius:15px; margin-bottom:10px; border:1px solid #eee;"><p><b>س${i+1}:</b> ${q.text}</p>${opts}</div>`;
-        });
-        runTimer(startTime);
-        window.scrollTo(0,0);
-    }
-
-    window.pick = (q, o) => {
-        selectedAns[q] = o;
-        document.querySelectorAll(`[id^="q${q}_"]`).forEach(el => el.classList.remove('selected'));
-        document.getElementById(`q${q}_o${o}`).classList.add('selected');
-    };
-
-    function runTimer(start) {
-        clearInterval(timerInt);
-        timerInt = setInterval(() => {
-            const rem = 3600 - Math.floor((Date.now() - start) / 1000);
-            if(rem <= 0) submitExam(true);
-            else {
-                const m = Math.floor(rem/60); const s = rem%60;
-                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-            }
-        }, 1000);
-    }
-
-    window.submitExam = async (auto = false) => {
-        if(!auto && Object.keys(selectedAns).length < currentExam.questions.length) {
-            showAlert("أجب على جميع الأسئلة أولاً!", "error"); return;
-        }
-        let score = 0;
-        currentExam.questions.forEach((q, i) => { if(selectedAns[i] == q.correct) score++; });
-        const user = JSON.parse(localStorage.getItem('user'));
-        await set(ref(db, `results/${user.username}/${currentExam.id}`), {
-            score, total: currentExam.questions.length, title: currentExam.title
-        });
-        clearInterval(timerInt);
-        localStorage.removeItem(`t_${currentExam.id}`);
-        showAlert("تم ارسال الاختبار شكرا يا بطل 😍", "success");
-        switchTab('exams');
-    };
-
-    window.showHistory = async () => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const snap = await get(child(ref(db), `results/${user.username}`));
-        let html = '<div style="margin-top:10px;"><h3 style="font-weight:900; margin-bottom:15px;">📊 سجل درجاتي</h3>';
-        if(snap.val()) {
-            Object.values(snap.val()).forEach(r => {
-                html += `
-                    <div class="history-item">
-                        <div style="font-weight:700;">${r.title}</div>
-                        <div class="score-badge">${r.score} / ${r.total}</div>
-                    </div>`;
-            });
-        } else {
-            html += '<p style="text-align:center; color:#94a3b8; padding:20px;">لا توجد نتائج مسجلة بعد</p>';
-        }
-        html += `<button onclick="switchTab('exams')" class="btn-start-small" style="background:#eee; color:#666; margin-top:10px;">عودة للخلف</button></div>`;
-        document.getElementById('mainDisplay').innerHTML = html;
     };
 
     window.logout = () => {
         localStorage.clear();
         document.getElementById('dashboardPage').classList.add('hidden');
         document.getElementById('loginPage').classList.remove('hidden');
+        toggleSidebar(false);
         showAlert("تم تسجيل الخروج");
     };
 
