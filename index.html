@@ -21,17 +21,32 @@
         .login-card { width: 90%; max-width: 380px; text-align: center; padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); background: #fff; }
         .input-field { width: 100%; padding: 16px; margin: 8px 0; border-radius: 15px; border: 2px solid #f1f5f9; outline: none; text-align: right; font-size: 16px; background: #f8fafc; }
         
-        /* أزرار وروابط تحت الدخول */
         .guest-link { color: #94a3b8; font-size: 13px; font-weight: 700; cursor: pointer; display: block; margin-top: 12px; text-decoration: none; }
         .guest-link:hover { color: var(--primary); }
         .join-link { color: var(--primary); font-weight: 800; cursor: pointer; text-decoration: underline; display: block; margin-top: 10px; font-size: 14px; }
         .support-btn-small { background: #25d366; color: white; padding: 8px 18px; border-radius: 50px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 800; margin-top: 20px; font-size: 12px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2); }
 
+        /* --- نموذج الانضمام (Modal) --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-card { background: white; width: 95%; max-width: 450px; border-radius: 30px; padding: 30px; position: relative; max-height: 90vh; overflow-y: visible; }
+        .modal-title { font-weight: 900; color: var(--primary); margin-bottom: 20px; font-size: 20px; text-align: center; }
+        
+        .custom-select-wrapper { position: relative; margin-bottom: 15px; text-align: right; }
+        .custom-select-trigger { padding: 16px; background: #f8fafc; border: 2px solid #f1f5f9; border-radius: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: #1e293b; }
+        .custom-options { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10010; display: none; overflow-y: auto; max-height: 200px; border: 1px solid #e2e8f0; margin-top: 5px; }
+        .custom-option { padding: 14px 16px; cursor: pointer; font-weight: 600; color: #1e293b; border-bottom: 1px solid #f1f5f9; }
+        .custom-option:hover { background: var(--primary-light); color: var(--primary); }
+        .show-options { display: block; }
+
+        .phone-group { display: flex; gap: 8px; direction: ltr; margin-bottom: 15px; }
+        .country-code { width: 115px; background: #f8fafc; border: 2px solid #f1f5f9; border-radius: 15px; padding: 10px; font-weight: 900; text-align: center; outline: none; cursor: pointer; font-size: 13px; appearance: none; }
+        .phone-input { flex: 1; padding: 16px; background: #f8fafc; border: 2px solid #f1f5f9; border-radius: 15px; outline: none; font-weight: 700; font-size: 16px; text-align: left; }
+
         /* --- التنبيهات --- */
         #customAlert { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: white; padding: 15px 25px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); z-index: 10002; display: flex; align-items: center; gap: 12px; font-weight: 800; border: 2px solid var(--primary); transition: 0.5s; width: max-content; max-width: 90%; }
         #customAlert.show { top: 20px; }
 
-        /* --- القائمة الجانبية واللوحة --- */
+        /* --- اللوحة --- */
         .sidebar { width: var(--sidebar-width); background: white; height: 100vh; position: fixed; right: -300px; top: 0; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; z-index: 2000; box-shadow: -10px 0 30px rgba(0,0,0,0.05); }
         .sidebar.open { right: 0; }
         .logout-circle { position: absolute; top: 15px; left: 15px; width: 40px; height: 40px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--danger); cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -83,11 +98,48 @@
         <button onclick="login()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:12px; font-weight:900; margin-top:10px; cursor:pointer;">دخول للمنصة</button>
         
         <span class="guest-link" onclick="guestLogin()">الدخول كـ زائر</span>
-        <span class="join-link" onclick="showAlert('قريباً سيتم تفعيل التسجيل المباشر! 😍', 'warning')">انضم إلينا الآن</span>
+        <span class="join-link" onclick="openJoinModal()">انضم إلينا الآن</span>
         
         <a href="https://wa.me/966534553706" class="support-btn-small" target="_blank">
             <i class="fab fa-whatsapp"></i> الدعم الفني
         </a>
+    </div>
+</div>
+
+<div class="modal-overlay" id="joinModal">
+    <div class="modal-card">
+        <div class="modal-title">تسجيل نخبة جديدة 🚀</div>
+        <input type="text" id="regName" class="input-field" placeholder="اسم الطالب/ة رباعي">
+
+        <div class="custom-select-wrapper" style="z-index: 10020;">
+            <div class="custom-select-trigger" onclick="toggleSelect('stageOptions')">
+                <span id="selectedStage">اختر المرحلة الدراسية</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="custom-options" id="stageOptions">
+                <div class="custom-option" onclick="selectStage('ابتدائي')">الابتدائية</div>
+                <div class="custom-option" onclick="selectStage('متوسط')">المتوسطة</div>
+                <div class="custom-option" onclick="selectStage('ثانوي')">الثانوية</div>
+            </div>
+        </div>
+
+        <div class="custom-select-wrapper" style="z-index: 10015;">
+            <div class="custom-select-trigger" onclick="toggleSelect('gradeOptions')">
+                <span id="selectedGrade">اختر الصف</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="custom-options" id="gradeOptions">
+                <div style="padding:15px; color:#94a3b8; font-size:12px;">اختر المرحلة أولاً</div>
+            </div>
+        </div>
+
+        <div class="phone-group">
+            <select class="country-code" id="regCountry"></select>
+            <input type="text" class="phone-input" id="regPhone" placeholder="رقم الجوال بدون صفر" oninput="validatePhone(this)">
+        </div>
+
+        <button onclick="submitJoinRequest()" style="width:100%; padding:15px; background:var(--success); color:white; border:none; border-radius:15px; font-weight:900; margin-top:10px; cursor:pointer; font-size:16px;">إرسال طلب الانضمام</button>
+        <button onclick="closeJoinModal()" style="width:100%; background:none; border:none; color:#94a3b8; margin-top:15px; font-weight:700; cursor:pointer;">إلغاء</button>
     </div>
 </div>
 
@@ -130,7 +182,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getDatabase, ref, get, child, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+    import { getDatabase, ref, get, child, set, push } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCr4T8GLRxtf_6LNrokjKvmBOwSkuGO5yQ",
@@ -141,6 +193,75 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+
+    // أكواد الدول
+    const countries = [
+        {c: "+966", n: "🇸🇦"}, {c: "+971", n: "🇦🇪"}, {c: "+965", n: "🇰🇼"}, {c: "+968", n: "🇴🇲"}, 
+        {c: "+974", n: "🇶🇦"}, {c: "+973", n: "🇧🇭"}, {c: "+20", n: "🇪🇬"}, {c: "+962", n: "🇯🇴"},
+        {c: "+961", n: "🇱🇧"}, {c: "+963", n: "🇸🇾"}, {c: "+964", n: "🇮🇶"}, {c: "+212", n: "🇲🇦"},
+        {c: "+213", n: "🇩🇿"}, {c: "+216", n: "🇹🇳"}, {c: "+249", n: "🇸🇩"}, {c: "+967", n: "🇾🇪"}
+    ];
+    const cSelect = document.getElementById('regCountry');
+    countries.forEach(i => { let o = document.createElement('option'); o.value = i.c; o.innerText = `${i.n} ${i.c}`; cSelect.appendChild(o); });
+
+    window.validatePhone = (input) => {
+        input.value = input.value.replace(/\D/g, '');
+        if(input.value.startsWith('0')) {
+            input.value = input.value.substring(1);
+            showAlert("يرجى كتابة الرقم بدون الصفر الأول", "warning");
+        }
+    };
+
+    const gradesMap = {
+        'ابتدائي': ['أول ابتدائي', 'ثاني ابتدائي', 'ثالث ابتدائي', 'رابع ابتدائي', 'خامس ابتدائي', 'سادس ابتدائي'],
+        'متوسط': ['أول متوسط', 'ثاني متوسط', 'ثالث متوسط'],
+        'ثانوي': ['أول ثانوي', 'ثاني ثانوي', 'ثالث ثانوي']
+    };
+    let selectedData = { stage: '', grade: '' };
+
+    window.openJoinModal = () => document.getElementById('joinModal').style.display = 'flex';
+    window.closeJoinModal = () => document.getElementById('joinModal').style.display = 'none';
+
+    window.toggleSelect = (id) => {
+        const target = document.getElementById(id);
+        const isOpen = target.classList.contains('show-options');
+        document.querySelectorAll('.custom-options').forEach(o => o.classList.remove('show-options'));
+        if(!isOpen) target.classList.add('show-options');
+    };
+
+    window.selectStage = (stage) => {
+        selectedData.stage = stage;
+        document.getElementById('selectedStage').innerText = stage;
+        document.getElementById('selectedGrade').innerText = 'اختر الصف';
+        document.getElementById('stageOptions').classList.remove('show-options');
+        const gOptions = document.getElementById('gradeOptions');
+        gOptions.innerHTML = '';
+        gradesMap[stage].forEach(g => {
+            const div = document.createElement('div');
+            div.className = 'custom-option';
+            div.innerText = g;
+            div.onclick = (e) => {
+                e.stopPropagation();
+                selectedData.grade = g;
+                document.getElementById('selectedGrade').innerText = g;
+                gOptions.classList.remove('show-options');
+            };
+            gOptions.appendChild(div);
+        });
+    };
+
+    window.submitJoinRequest = async () => {
+        const name = document.getElementById('regName').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        if(!name || !selectedData.grade || !phone) return showAlert("أكمل البيانات", "error");
+        try {
+            await push(ref(db, 'join_requests'), {
+                name, grade: selectedData.grade, phone: document.getElementById('regCountry').value + phone, date: Date.now()
+            });
+            showAlert("تم الإرسال بنجاح! 😍");
+            closeJoinModal();
+        } catch(e) { showAlert("خطأ", "error"); }
+    };
 
     window.showAlert = (msg, type = 'success') => {
         const box = document.getElementById('customAlert');
